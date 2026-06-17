@@ -118,8 +118,15 @@ export default function App() {
                 key={index}
                 className="relative flex flex-col items-center group cursor-grab active:cursor-grabbing"
               >
-                {/* Tactile Motion Physics wrapper */}
+                {/* Tactile Motion Physics wrapper with organic entrada transition */}
                 <motion.div
+                  initial={{ opacity: 0, y: 70, filter: "blur(6px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{
+                    duration: 1.8,
+                    delay: index * 0.18,
+                    ease: [0.16, 1, 0.3, 1], // Poetic super fluid ease out
+                  }}
                   drag
                   dragConstraints={{ left: -100, right: 100, top: -100, bottom: 100 }}
                   dragElastic={0.4}
@@ -150,6 +157,20 @@ export default function App() {
           })}
         </div>
       </div>
+
+      {/* Elegant, ultra-fine vertical artistic text "未来已至" in bottom-right corner */}
+      <motion.div
+        initial={{ opacity: 0, x: 15, filter: "blur(4px)" }}
+        animate={{ opacity: 0.6, x: 0, filter: "blur(0px)" }}
+        transition={{ duration: 2.5, delay: 1.1, ease: "easeOut" }}
+        style={{ 
+          fontFamily: "'Noto Serif SC', serif",
+          writingMode: "vertical-rl"
+        }}
+        className="absolute bottom-12 right-12 text-xs md:text-sm font-extralight tracking-[0.7em] text-neutral-400 pointer-events-none select-none transition-colors duration-700"
+      >
+        未来已至
+      </motion.div>
     </main>
   );
 }
