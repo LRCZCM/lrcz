@@ -1,0 +1,6 @@
+{
+  "name": "来日创造",
+  "description": "一个极简、独具艺术感与未来主义视觉的“来日创造”单页展示。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
