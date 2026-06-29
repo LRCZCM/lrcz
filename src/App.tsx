@@ -171,6 +171,25 @@ export default function App() {
       >
         未来已至
       </motion.div>
+
+      {/* Elegant, minimalist ICP registration link at the bottom center */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 0.45 }}
+        whileHover={{ opacity: 0.8 }}
+        transition={{ duration: 2.5, delay: 1.3, ease: "easeOut" }}
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 text-[10px] md:text-xs font-light tracking-[0.2em] text-neutral-400 z-20"
+      >
+        <a 
+          href="https://beian.miit.gov.cn/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="hover:text-neutral-800 transition-colors duration-300 relative group py-1"
+        >
+          浙ICP备2025170013号-4
+          <span className="absolute bottom-0 left-0 w-full h-[0.5px] bg-neutral-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+        </a>
+      </motion.div>
     </main>
   );
 }
