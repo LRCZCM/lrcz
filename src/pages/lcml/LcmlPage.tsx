@@ -1,13 +1,14 @@
-import { buttonVariants, Card } from '@heroui/react'
-import { Activity, ArrowUpRight, Box, Download, Layers, RefreshCw, Search } from 'lucide-react'
+import { Button, buttonVariants, Card } from '@heroui/react'
+import { Activity, ArrowUpRight, Box, Download, Layers, RefreshCw, Search, Zap } from 'lucide-react'
 import { motion } from 'motion/react'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import lcmlIcon from '@/assets/lcml-icon.svg'
 import { site } from '@/app/site'
 import { SiteFooter } from '@/components/SiteFooter'
 import { ChangelogSection } from './ChangelogSection'
 import { DemoSection } from './DemoSection'
-import { DOWNLOAD_URL, FEEDBACK_URL, GITHUB_URL } from './release'
+import { DOWNLOAD_URL, downloadUrl, FEEDBACK_URL, GITHUB_URL, proxyDownloadUrl } from './release'
 import { useChangelog } from './useChangelog'
 
 const features = [
@@ -30,6 +31,25 @@ function rise(delay: number) {
 }
 
 const external = { target: '_blank', rel: 'noopener noreferrer' }
+
+type DownloadButtonProps = {
+  href: string | null
+  variant: 'primary' | 'secondary'
+  children: ReactNode
+}
+
+// 直接下载最新版安装包；地址要用更新日志里的版本号，读到之前按钮不可点
+function DownloadButton({ href, variant, children }: DownloadButtonProps) {
+  return href ? (
+    <a href={href} className={buttonVariants({ size: 'lg', variant })}>
+      {children}
+    </a>
+  ) : (
+    <Button size="lg" variant={variant} isDisabled>
+      {children}
+    </Button>
+  )
+}
 
 export function LcmlPage() {
   const changelog = useChangelog()
@@ -84,10 +104,14 @@ export function LcmlPage() {
         </motion.p>
         <motion.div {...rise(0.3)} className="mt-9 flex flex-col items-center gap-3.5">
           <span className="flex flex-wrap justify-center gap-3">
-            <a href={DOWNLOAD_URL} {...external} className={buttonVariants({ size: 'lg' })}>
+            <DownloadButton href={latest && downloadUrl(latest)} variant="primary">
               <Download className="size-4" />
               下载 Windows 版
-            </a>
+            </DownloadButton>
+            <DownloadButton href={latest && proxyDownloadUrl(latest)} variant="secondary">
+              <Zap className="size-4" />
+              国内加速下载
+            </DownloadButton>
             <a
               href={GITHUB_URL}
               {...external}
@@ -133,10 +157,14 @@ export function LcmlPage() {
         <img src={lcmlIcon} alt="" className="mx-auto size-[72px] rounded-[24%]" />
         <h2 className="mt-5 text-[clamp(32px,5vw,48px)] font-bold tracking-tight">现在就开始。</h2>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a href={DOWNLOAD_URL} {...external} className={buttonVariants({ size: 'lg' })}>
+          <DownloadButton href={latest && downloadUrl(latest)} variant="primary">
             <Download className="size-4" />
             下载 LCML
-          </a>
+          </DownloadButton>
+          <DownloadButton href={latest && proxyDownloadUrl(latest)} variant="secondary">
+            <Zap className="size-4" />
+            国内加速下载
+          </DownloadButton>
           <a
             href={FEEDBACK_URL}
             {...external}
