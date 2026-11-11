@@ -6,7 +6,7 @@
 
 - 项目已初始化（2026-11-11）：Vite + React + TypeScript 骨架，接入 HeroUI v3、Tailwind CSS v4、Lucide、Motion，配置 oxlint、Prettier 与 `@/` 路径别名；首页为验证依赖接通的占位页。
 - 协作文档已按 LCML 规范建立，见 [AGENTS](../../AGENTS.md#资料位置)。
-- 本地 Git 仓库已初始化，尚未配置远程仓库。
+- Git 远程仓库为 `https://github.com/LRCZCM/lrcz.git`（`main` 分支）。
 
 ## 待人工验证
 
@@ -15,13 +15,14 @@
 ## 待定事项
 
 - 产品用途与首个里程碑。
-- 远程仓库地址。
+- 页脚落实 ICP 备案号（见 [DECISIONS 的 ICP 备案](DECISIONS.md#icp-备案)）。
 - 路由（建议 React Router）、全局状态管理（建议先用 React 自带，复杂后再定）、请求方式（建议 `fetch` 封装在 `src/api/`，需要缓存时再考虑 TanStack Query）。
 - 国际化：是否需要多语言。
 - 主题定制（品牌色、字体）与深色模式切换方式。
 - 测试框架（建议首次需要时引入 Vitest）。
-- 部署方式。
+- 阿里云 EAS 的部署配置（见 [DECISIONS 的部署](DECISIONS.md#部署)）。
 
 ## 近期记录
 
 1. 2026-11-11 项目初始化：脚手架、依赖、规范文档、本地 Git。验证：`npm run check` 通过（类型检查、oxlint、Prettier、构建）；浏览器中的显示效果未验证。
+2. 2026-11-11 关联远程仓库并覆盖旧内容；记录 ICP 备案号与阿里云 EAS 部署决定。
