@@ -7,12 +7,8 @@ import { site } from '@/app/site'
 import { SiteFooter } from '@/components/SiteFooter'
 import { ChangelogSection } from './ChangelogSection'
 import { DemoSection } from './DemoSection'
+import { DOWNLOAD_URL, FEEDBACK_URL, GITHUB_URL } from './release'
 import { useChangelog } from './useChangelog'
-
-// 安装包与反馈都在公开发布仓库（不含源码）
-const GITHUB_URL = 'https://github.com/LRCZCM/LCML-release'
-const DOWNLOAD_URL = 'https://github.com/LRCZCM/LCML-release/releases/latest'
-const FEEDBACK_URL = 'https://github.com/LRCZCM/LCML-release/issues/new/choose'
 
 const features = [
   { Icon: Layers, title: '五种加载器', text: '原版、Fabric、Quilt、Forge、NeoForge' },
@@ -57,6 +53,9 @@ export function LcmlPage() {
           <a href="#changelog" className="transition-colors hover:text-foreground max-sm:hidden">
             更新日志
           </a>
+          <Link to="/lcml/manual" className="transition-colors hover:text-foreground">
+            使用手册
+          </Link>
           <a
             href={FEEDBACK_URL}
             {...external}

@@ -1,14 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
+import { fetchReleaseFile } from './release'
 
 const TYPES = ['增加', '更新', '修复', '移除'] as const
 export type ChangeType = (typeof TYPES)[number]
 export type Release = { version: string; items: { type: ChangeType | null; text: string }[] }
-
-// 更新日志来自 LCML 公开发布仓库的 CHANGELOG.md；GitHub 连不上时改走 jsDelivr 镜像（缓存约 12 小时）
-const SOURCES = [
-  'https://raw.githubusercontent.com/LRCZCM/LCML-release/main/CHANGELOG.md',
-  'https://cdn.jsdelivr.net/gh/LRCZCM/LCML-release@main/CHANGELOG.md',
-]
 
 // 格式：“## 版本号”开始一个版本，“- 类型：内容”是一条改动；空的“未发布”不显示
 export function parseChangelog(markdown: string): Release[] {
@@ -27,12 +22,8 @@ export function parseChangelog(markdown: string): Release[] {
 }
 
 async function loadChangelog() {
-  for (const url of SOURCES) {
-    // 网络错误时换下一个来源
-    const response = await fetch(url, { cache: 'no-cache' }).catch(() => null)
-    if (response?.ok) return parseChangelog(await response.text())
-  }
-  throw new Error('更新日志读取失败')
+  const { text } = await fetchReleaseFile('CHANGELOG.md')
+  return parseChangelog(text)
 }
 
 type ChangelogState =

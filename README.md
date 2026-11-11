@@ -14,6 +14,7 @@
 | 样式              | Tailwind CSS v4（`@tailwindcss/vite`）         |
 | 图标              | Lucide（`lucide-react`）                       |
 | 动效              | Motion（`motion`，从 `motion/react` 引入）     |
+| Markdown 解析     | marked（LCML 使用手册）                        |
 | 代码检查 / 格式化 | oxlint / Prettier（含 Tailwind 类名排序插件）  |
 
 版本以 `package.json` 与 `package-lock.json` 为准。

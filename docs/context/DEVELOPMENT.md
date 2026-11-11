@@ -24,7 +24,7 @@
 | `src/api/`        | 请求外部接口的函数与响应类型，一个后端资源一个文件                                                     | 不放界面状态                                           | 待定   |
 | `public/`         | 原样拷贝的静态文件（favicon 等）                                                                       | 需要打包处理的图片放到引用它的页面或组件旁边           | 已建立 |
 
-LCML 产品页在 `src/pages/lcml/`：`LcmlPage` 为页面骨架，`DemoSection` 与 `demo/` 为启动器复原动画（`state.ts` 界面状态、`chapters.ts` 各章脚本、其余为各页面视图），`useChangelog.ts` 读取并解析更新日志，素材放在 `assets/`。
+LCML 产品页在 `src/pages/lcml/`：`LcmlPage` 为页面骨架，`DemoSection` 与 `demo/` 为启动器复原动画（`state.ts` 界面状态、`chapters.ts` 各章脚本、其余为各页面视图），`useChangelog.ts` 读取并解析更新日志，素材放在 `assets/`；`release.ts` 是发布仓库的地址与读取文件（GitHub 失败改走 jsDelivr）。使用手册 `/lcml/manual` 在 `manual/`：`ManualPage` 为页面骨架，`manual.ts` 读取、解析手册（目录、标题锚点、搜索小节、链接转换），`Markdown.tsx` 把 marked 的解析结果渲染成界面，其余为首页、导航、目录、搜索组件。
 
 路由用 React Router 的 `BrowserRouter`，路由表写在 `src/app/App.tsx`，一个产品一个路由（如 `/lcml`），未知路径回到首页。全局状态管理、请求库、国际化尚未选型，见 [NOW 的待定事项](NOW.md#待定事项)。
 
@@ -52,17 +52,18 @@ LCML 产品页在 `src/pages/lcml/`：`LcmlPage` 为页面骨架，`DemoSection`
 
 当前依赖用途：
 
-| 依赖                                         | 用途                       |
-| -------------------------------------------- | -------------------------- |
-| `react`、`react-dom`                         | 界面框架                   |
-| `@heroui/react`、`@heroui/styles`            | 组件库与其样式、主题       |
-| `lucide-react`                               | 图标                       |
-| `motion`                                     | 动效                       |
-| `react-router`                               | 页面路由                   |
-| `tailwindcss`、`@tailwindcss/vite`           | 样式与其 Vite 插件         |
-| `vite`、`@vitejs/plugin-react`、`typescript` | 构建与类型检查             |
-| `oxlint`                                     | 代码检查                   |
-| `prettier`、`prettier-plugin-tailwindcss`    | 格式化与 Tailwind 类名排序 |
+| 依赖                                         | 用途                          |
+| -------------------------------------------- | ----------------------------- |
+| `react`、`react-dom`                         | 界面框架                      |
+| `@heroui/react`、`@heroui/styles`            | 组件库与其样式、主题          |
+| `lucide-react`                               | 图标                          |
+| `motion`                                     | 动效                          |
+| `react-router`                               | 页面路由                      |
+| `marked`                                     | 解析 LCML 使用手册的 Markdown |
+| `tailwindcss`、`@tailwindcss/vite`           | 样式与其 Vite 插件            |
+| `vite`、`@vitejs/plugin-react`、`typescript` | 构建与类型检查                |
+| `oxlint`                                     | 代码检查                      |
+| `prettier`、`prettier-plugin-tailwindcss`    | 格式化与 Tailwind 类名排序    |
 
 ## 测试范围
 
