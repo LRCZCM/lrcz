@@ -1,6 +1,6 @@
 # LRCZ
 
-纯前端项目，不含后端服务。产品用途：待定（见 [NOW 的待定事项](docs/context/NOW.md#待定事项)）。
+来日创造（LRCZ）的官网。纯前端项目，不含后端服务。
 
 协作规则见 [AGENTS](AGENTS.md)。
 
@@ -26,7 +26,7 @@
 
 ```bash
 npm install          # 安装依赖
-npm run dev          # 启动开发服务器
+npm run dev          # 启动开发服务器（http://127.0.0.1:5173）
 npm run build        # 类型检查并构建到 dist/
 npm run preview      # 本地预览构建产物
 npm run typecheck    # 只做类型检查

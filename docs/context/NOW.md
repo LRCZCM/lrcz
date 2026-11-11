@@ -4,25 +4,34 @@
 
 ## 进度
 
-- 项目已初始化（2026-11-11）：Vite + React + TypeScript 骨架，接入 HeroUI v3、Tailwind CSS v4、Lucide、Motion，配置 oxlint、Prettier 与 `@/` 路径别名；首页为验证依赖接通的占位页。
+- 项目已初始化（2026-11-11）：Vite + React + TypeScript 骨架，接入 HeroUI v3、Tailwind CSS v4、Lucide、Motion，配置 oxlint、Prettier 与 `@/` 路径别名。
+- 主页已按设计稿方案 A 完成，用户已验收：标志加“来日创造”、LRCZ、邮箱按钮、“产品”下拉按钮（LCML → `/lcml`），页脚版权与 ICP 备案号；颜色模式跟随系统，适配手机。设计稿原文在 `.local/drafts/`。
+- LCML 产品页 `/lcml` 已按设计稿方案 A 完成，用户已验收：首屏与下载按钮、启动器界面复原动画（登录、启动、实例、新建、资源、皮肤、外观七章）、功能卡片、更新日志（打开页面时读取 LCML-release 的 CHANGELOG.md 并解析）、下载与反馈入口。设计稿原文在 `.local/drafts/lcml/`。
 - 协作文档已按 LCML 规范建立，见 [AGENTS](../../AGENTS.md#资料位置)。
 - Git 远程仓库为 `https://github.com/LRCZCM/lrcz.git`（`main` 分支）。
 
 ## 待人工验证
 
-- `npm run dev` 打开首页，确认 HeroUI 按钮样式、Lucide 图标与入场动效正常显示。
+暂无。
 
 ## 待定事项
 
-- 产品用途与首个里程碑。
-- 页脚落实 ICP 备案号（见 [DECISIONS 的 ICP 备案](DECISIONS.md#icp-备案)）。
-- 路由（建议 React Router）、全局状态管理（建议先用 React 自带，复杂后再定）、请求方式（建议 `fetch` 封装在 `src/api/`，需要缓存时再考虑 TanStack Query）。
+- 更新日志的读取方式：现为打开页面时从 GitHub 读取（失败改走 jsDelivr 镜像，再失败提示重试）；备选为打包网站时读取一次写进页面（国内打开更快、不依赖访客网络，但 LCML 每次发版后要重新部署网站），待用户定。
+- JS 包约 690KB，超过构建的 500KB 提示线；建议把 `/lcml` 页改为按需加载，待用户定。
+- 全局状态管理（建议先用 React 自带，复杂后再定）、请求方式（建议 `fetch` 封装在 `src/api/`，需要缓存时再考虑 TanStack Query）。
 - 国际化：是否需要多语言。
 - 主题定制（品牌色、字体）与深色模式切换方式。
 - 测试框架（建议首次需要时引入 Vitest）。
-- 阿里云 EAS 的部署配置（见 [DECISIONS 的部署](DECISIONS.md#部署)）。
+- 阿里云 EAS 的部署配置（见 [DECISIONS 的部署](DECISIONS.md#部署)），需配置未知路径回退到 `index.html`。
 
 ## 近期记录
 
 1. 2026-11-11 项目初始化：脚手架、依赖、规范文档、本地 Git。验证：`npm run check` 通过（类型检查、oxlint、Prettier、构建）；浏览器中的显示效果未验证。
 2. 2026-11-11 关联远程仓库并覆盖旧内容；记录 ICP 备案号与阿里云 EAS 部署决定。
+3. 2026-11-11 主页：首屏、LCML 产品介绍、关于、页脚（落实 ICP 备案号）；截图与图标取自 LCML 仓库，图标同时用作网站图标。验证：`npm run check` 通过；用无界面 Edge 截图查看了桌面浅色、深色与 390px 手机宽度的整页效果；真实浏览器中的动效与链接跳转未验证。
+4. 2026-11-11 用户觉得主页文字太多、产品先不做：删除 LCML 产品区及其截图，主页只留必要信息；在 `.local/drafts/` 出三份 HTML 设计稿，用无界面 Edge 截图检查过桌面与手机宽度。
+5. 2026-11-11 用户选定方案 A 并要求标志放在文字前：主页重写为单屏（`BrandMark`、`HomePage`、`SiteFooter`），删除页头、首屏、关于与滚动入场组件；开发服务器固定在 127.0.0.1。验证：`npm run check` 通过；无界面 Edge 截图检查了浅色、深色与手机宽度。
+6. 2026-11-11 首页邮箱下方加产品入口（LCML，深色底图标），引入 React Router，新增 `/lcml` 占位页；页脚与站点常量移到 `src/components/`、`src/app/`；主体整块上移 8vh 做视觉居中。验证：`npm run check` 通过；预览服务器直接访问 `/lcml` 返回 200；无界面 Edge 截图检查了首页浅色、手机深色与 `/lcml`。
+7. 2026-11-11 产品入口改为邮箱旁的“产品”下拉按钮（HeroUI Dropdown，支持悬停、点击、触屏与键盘），去掉图标那一排。验证：`npm run check` 通过（提示 JS 包 609KB 超过 500KB 警告线，未处理）；用 puppeteer 驱动 Edge 实测：悬停打开、移入面板保持、移开关闭、悬停后点击不关闭、点项目跳转、触屏点按打开与点外部关闭、键盘回车打开 / Esc 关闭 / 回车选中跳转均通过；鼠标悬停打开时按 Esc 不关闭（焦点不在菜单内）。
+8. 2026-11-11 LCML 产品页：用户选设计稿 A，要求演示再加实例页、下载页的功能并尽量还原。实现 `src/pages/lcml/`（`LcmlPage`、`DemoSection`、`ChangelogSection`、`useChangelog`、`demo/` 启动器复原），素材（壁纸、方块图标、皮肤渲染图）取自 LCML 仓库放在 `src/pages/lcml/assets/`；界面文案取自 LCML 中文语言文件，布局参照 LCML 11 月 6 日的界面截图与当天首次启动截图。验证：`npm run check` 通过（JS 包约 690KB 的提示同上）；puppeteer 驱动 Edge 按时间点截取七章画面逐一检查，整页看了桌面浅色、深色与 390px 手机宽度，均无横向滚动、无脚本报错；点章节跳转、更新日志拦截网络后的错误提示与重试加载均实测通过。
+9. 2026-11-11 LCML 产品页按用户意见调整：演示下方注明“网页模拟的界面示意、LCML 基于 JavaFX 开发”；首屏图标移到“LCML”左侧，下载按钮旁加 GitHub 按钮（公开发布仓库）；章节去掉说明文字只留标题。验证：`npm run check` 通过，无界面 Edge 截图检查桌面与手机宽度；用户实测首页与 LCML 页后确认提交。
