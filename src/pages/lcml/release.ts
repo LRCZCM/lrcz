@@ -3,15 +3,13 @@ export const GITHUB_URL = 'https://github.com/LRCZCM/LCML-release'
 export const DOWNLOAD_URL = `${GITHUB_URL}/releases/latest`
 export const FEEDBACK_URL = `${GITHUB_URL}/issues/new/choose`
 
-// 第三方 GitHub 代理（ghfast.top），国内连不上 GitHub 时用；域名常被封后更换，失效时改这里
-const PROXY = 'https://ghfast.top/'
+// 第三方 GitHub 代理（gh-proxy.org），国内连不上 GitHub 时用；失效时改这里
+const PROXY = 'https://gh-proxy.org/'
 const RAW = 'https://raw.githubusercontent.com/LRCZCM/LCML-release/main/'
-// GitHub 与代理都是最新内容，同时请求谁快用谁
-const FRESH_SOURCES = [RAW, PROXY + RAW]
-// jsDelivr 缓存约 12 小时，可能不是最新，只在前两者都失败时用
-const FALLBACK_SOURCE = 'https://cdn.jsdelivr.net/gh/LRCZCM/LCML-release@main/'
+// GitHub 与代理同时请求，谁快用谁
+const SOURCES = [RAW, PROXY + RAW]
 // 连不上时常常不立刻报错，超时就算失败
-const TIMEOUT = 6000
+const TIMEOUT = 10000
 
 /** 某个版本的安装包（发行版标签 v版本号，文件 LCML-版本号.exe）。 */
 export const downloadUrl = (version: string) =>
@@ -40,9 +38,9 @@ export async function fetchReleaseFile(path: string) {
 
   const race = new AbortController()
   const signal = AbortSignal.any([race.signal, AbortSignal.timeout(TIMEOUT)])
-  const result = await Promise.any(FRESH_SOURCES.map((base) => fetchFrom(base, path, signal)))
-    .catch(() => fetchFrom(FALLBACK_SOURCE, path, AbortSignal.timeout(TIMEOUT)))
-    .finally(() => race.abort())
+  const result = await Promise.any(SOURCES.map((base) => fetchFrom(base, path, signal))).finally(
+    () => race.abort(),
+  )
   fastest = result.base
   return result
 }

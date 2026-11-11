@@ -17,7 +17,7 @@
 
 ## 待定事项
 
-- 更新日志的读取方式：现为打开页面时从 GitHub 读取（失败改走 jsDelivr 镜像，再失败提示重试）；备选为打包网站时读取一次写进页面（国内打开更快、不依赖访客网络，但 LCML 每次发版后要重新部署网站），待用户定。
+- 更新日志的读取方式：现为打开页面时同时从 GitHub 与 gh-proxy 代理读取（都失败提示重试）；备选为打包网站时读取一次写进页面（国内打开更快、不依赖访客网络，但 LCML 每次发版后要重新部署网站），待用户定。
 - 加速下载的版本号取自更新日志：若 CHANGELOG 已写新版本而发行版尚未发布，两个下载按钮都会指向不存在的文件，发版顺序需注意（建议先发布再更新 CHANGELOG）。
 - JS 包约 945KB（加入使用手册后从 690KB 增加），超过构建的 500KB 提示线；建议把 `/lcml` 与 `/lcml/manual` 改为按需加载，待用户定。
 - 使用手册的分组：README 目录现为平铺列表，网页用代码里的默认分组；建议在 README 目录中用 `### 分组名` 写明，以后只改 README。待用户定。
@@ -41,3 +41,5 @@
 10. 2026-11-11 LCML 使用手册：先出 `.local/drafts/lcml/manual.html` 设计稿，用户确认后实现 `src/pages/lcml/manual/`，路由 `/lcml/manual/:chapter?`；新增依赖 `marked`；发布仓库地址与读取提取到 `src/pages/lcml/release.ts`（更新日志共用，新增 6 秒超时换源）；产品页顶栏加“使用手册”。验证：`npm run check` 通过（JS 包约 945KB 的提示）；用 Edge 调试协议实测：Ctrl K 搜索、方向键加回车跳到小节并对齐、站内 `xxx.md#小节` 链接跳转对齐、目录随滚动高亮、点截图看大图与 Esc 关闭、未知章节回到手册首页、390px 宽无横向滚动、抽屉打开与点章节后关闭、深色模式，均无脚本报错。
 11. 2026-11-11 国内访问：比较了 Gitee 原始文件（文字被跨域拦截）、Gitee 接口（快但每 IP 每小时 60 次）、jsDelivr 各线路与 ghfast 代理，用户选 ghfast。`release.ts` 改为 GitHub 与代理同时请求、用先返回的，都失败再走 jsDelivr；产品页首屏与结尾加“国内加速下载”。验证：`npm run check` 通过；Edge 调试协议拦截请求实测：正常时用 GitHub、拦掉 GitHub 时更新日志、手册与截图都走代理、两者都拦掉时走 jsDelivr，按钮地址为 `ghfast.top/…/releases/download/v26.11.11.4/LCML-26.11.11.4.exe`；用 curl 经代理下载该安装包返回 200（文件名正确，前 2MB 约 4 秒）。
 12. 2026-11-11 产品页“下载 Windows 版”与结尾“下载 LCML”改为从 GitHub 直接下载最新版安装包（`releases/download/v版本号/LCML-版本号.exe`），不再跳转发布页；顶栏小“下载”仍跳发布页。验证：`npm run check` 通过；curl 该地址经跳转返回 200、文件名正确。
+13. 2026-11-11 代理换成 gh-proxy.org，只保留 GitHub 与 gh-proxy 两个来源（去掉 ghfast 与 jsDelivr），超时由 6 秒放宽到 10 秒；加速下载也走 gh-proxy。验证：`npm run check` 通过；curl 确认 gh-proxy 允许跨域读取、经它下载安装包返回 200 且文件名正确（本机开着代理工具，测得的速度不代表国内访客）；Edge 拦截请求实测：正常用 GitHub、拦掉 GitHub 时更新日志、手册与截图走 gh-proxy、两者都拦掉时显示重试提示，下载按钮保持不可点。
+14. 2026-11-11 读不到更新日志时，“下载 Windows 版”“下载 LCML”改为新窗口打开 GitHub 发布页（加速下载仍不可点）。验证：`npm run check` 通过；Edge 拦掉 GitHub 与 gh-proxy 后两个主按钮指向发布页并带新窗口打开，加速下载为禁用。

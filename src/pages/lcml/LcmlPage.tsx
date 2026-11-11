@@ -41,7 +41,12 @@ type DownloadButtonProps = {
 // 直接下载最新版安装包；地址要用更新日志里的版本号，读到之前按钮不可点
 function DownloadButton({ href, variant, children }: DownloadButtonProps) {
   return href ? (
-    <a href={href} className={buttonVariants({ size: 'lg', variant })}>
+    <a
+      href={href}
+      // 发布页在新窗口打开；安装包直接下载，不开新窗口
+      {...(href === DOWNLOAD_URL && external)}
+      className={buttonVariants({ size: 'lg', variant })}
+    >
       {children}
     </a>
   ) : (
@@ -54,6 +59,12 @@ function DownloadButton({ href, variant, children }: DownloadButtonProps) {
 export function LcmlPage() {
   const changelog = useChangelog()
   const latest = changelog.state.status === 'done' ? changelog.state.releases[0].version : null
+  // 读不到更新日志就不知道最新版本号，改为跳转 GitHub 发布页
+  const directDownload = latest
+    ? downloadUrl(latest)
+    : changelog.state.status === 'error'
+      ? DOWNLOAD_URL
+      : null
 
   return (
     <div className="min-h-svh bg-background text-foreground">
@@ -104,7 +115,7 @@ export function LcmlPage() {
         </motion.p>
         <motion.div {...rise(0.3)} className="mt-9 flex flex-col items-center gap-3.5">
           <span className="flex flex-wrap justify-center gap-3">
-            <DownloadButton href={latest && downloadUrl(latest)} variant="primary">
+            <DownloadButton href={directDownload} variant="primary">
               <Download className="size-4" />
               下载 Windows 版
             </DownloadButton>
@@ -157,7 +168,7 @@ export function LcmlPage() {
         <img src={lcmlIcon} alt="" className="mx-auto size-[72px] rounded-[24%]" />
         <h2 className="mt-5 text-[clamp(32px,5vw,48px)] font-bold tracking-tight">现在就开始。</h2>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <DownloadButton href={latest && downloadUrl(latest)} variant="primary">
+          <DownloadButton href={directDownload} variant="primary">
             <Download className="size-4" />
             下载 LCML
           </DownloadButton>
