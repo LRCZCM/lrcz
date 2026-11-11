@@ -46,10 +46,10 @@
 
 ## 部署
 
-- 状态：已确认（细节待定）。
+- 状态：已确认。
 - 确认日期：2026-11-11。
-- 决定：部署在阿里云 EAS，沿用旧仓库的部署方式；具体配置待接入时补充。
-- 来源：用户说明旧仓库即用阿里云 EAS 部署；远程仓库 `https://github.com/LRCZCM/lrcz.git` 的旧内容由用户同意直接覆盖、不保留。
+- 决定：直接使用阿里云 ESA Pages 托管；项目根目录的 `esa.jsonc` 配置静态资源目录 `./dist`，`assets.notFoundStrategy` 为 `singlePageApplication`，让未命中静态文件的页面导航请求返回 `index.html`，支持直接访问和刷新前端路由。
+- 来源：用户确认使用 Pages 直接托管，并要求添加配置、提交推送（2026-11-11）；配置依据[阿里云官方文档](https://help.aliyun.com/zh/edge-security-acceleration/esa/user-guide/build-pages)。
 
 ## 品牌信息
 

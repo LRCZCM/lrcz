@@ -43,3 +43,4 @@
 12. 2026-11-11 产品页“下载 Windows 版”与结尾“下载 LCML”改为从 GitHub 直接下载最新版安装包（`releases/download/v版本号/LCML-版本号.exe`），不再跳转发布页；顶栏小“下载”仍跳发布页。验证：`npm run check` 通过；curl 该地址经跳转返回 200、文件名正确。
 13. 2026-11-11 代理换成 gh-proxy.org，只保留 GitHub 与 gh-proxy 两个来源（去掉 ghfast 与 jsDelivr），超时由 6 秒放宽到 10 秒；加速下载也走 gh-proxy。验证：`npm run check` 通过；curl 确认 gh-proxy 允许跨域读取、经它下载安装包返回 200 且文件名正确（本机开着代理工具，测得的速度不代表国内访客）；Edge 拦截请求实测：正常用 GitHub、拦掉 GitHub 时更新日志、手册与截图走 gh-proxy、两者都拦掉时显示重试提示，下载按钮保持不可点。
 14. 2026-11-11 读不到更新日志时，“下载 Windows 版”“下载 LCML”改为新窗口打开 GitHub 发布页（加速下载仍不可点）。验证：`npm run check` 通过；Edge 拦掉 GitHub 与 gh-proxy 后两个主按钮指向发布页并带新窗口打开，加速下载为禁用。
+15. 2026-11-11 用户确认直接使用 ESA Pages 托管，新增根目录 `esa.jsonc` 开启 SPA 路由回退（见 [部署决定](DECISIONS.md#部署)），解决直接访问 `/lcml` 等路由时的静态托管 404；记录未经用户同意不创建分支的要求。验证：`npm run check` 首次因配置格式未通过，Prettier 格式化后完整检查通过（仍有约 946KB 的 JS 包警告）；未部署验证。改动留在 `main`，未创建分支；受默认分支提交前须先建分支的工具规则限制，未提交推送。待部署后直接访问并刷新 `/lcml`、`/lcml/manual` 验证。
