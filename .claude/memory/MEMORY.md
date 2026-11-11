@@ -1,0 +1,6 @@
+- [用中文回复](reply-in-chinese.md) — 所有回复一律简体中文
+- [开发节奏](dev-cycle.md) — 集中提问→一次做完→给测试步骤→测过才更新文档并提交
+- [范围偏好](scope-preferences.md) — 做就做全、未发版不做兼容、审查看过度设计与隐性漏洞
+- [NOW 文档节奏](now-doc-cadence.md) — 平时只追加“近期记录”，整理归档由用户手动触发
+- [问题当通病修](fix-as-common-defect.md) — 界面问题全项目排查同类，修在共用组件里
+- [不准建 worktree](no-worktree.md) — 只在项目目录改动，未经允许不建 worktree
