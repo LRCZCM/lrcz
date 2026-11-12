@@ -6,3 +6,20 @@
     -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Segoe UI',
     'Microsoft YaHei', 'Noto Sans SC', sans-serif;
 }
+
+/* 全站滚动条用 HeroUI 主题的细滚动条，颜色随深浅色；个别滚动区可用 scrollbar-* 类覆盖 */
+@layer base {
+  * {
+    scrollbar-width: var(--scrollbar-width);
+    scrollbar-color: var(--scrollbar-color);
+  }
+}
+
+/* 侧栏等次要滚动区：平时隐藏滚动条，鼠标移入或键盘聚焦时才显示 */
+@utility scrollbar-hover {
+  scrollbar-color: transparent transparent;
+  &:hover,
+  &:focus-within {
+    scrollbar-color: var(--scrollbar-color);
+  }
+}

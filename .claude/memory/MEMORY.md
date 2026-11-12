@@ -4,4 +4,4 @@
 - [NOW 文档节奏](now-doc-cadence.md) — 平时只追加“近期记录”，整理归档由用户手动触发
 - [问题当通病修](fix-as-common-defect.md) — 界面问题全项目排查同类，修在共用组件里
 - [不准建 worktree](no-worktree.md) — 只在项目目录改动，未经允许不建 worktree
-- [分支授权](branch-policy.md) — 未经明确同意不创建分支，规则冲突时说明限制而不擅自操作
+- [分支授权](branch-policy.md) — 未经允许不建分支，改动、提交、推送都在 main 上

@@ -1,5 +1,5 @@
-import { Modal, Table, Typography } from '@heroui/react'
-import { ArrowUpRight } from 'lucide-react'
+import { Button, Modal, Skeleton, Table, Typography } from '@heroui/react'
+import { ArrowUpRight, ImageOff, RotateCw } from 'lucide-react'
 import type { MarkedToken, Token, Tokens } from 'marked'
 import { createContext, use, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
@@ -8,19 +8,25 @@ import { asMarked, manualRoute, plainText, type ManualFile } from './manual'
 // 整窗截图宽 1280，占满正文；弹窗等局部截图按同一比例缩小，不被放大发糊
 const FULL_SHOT_WIDTH = 1280
 
-type MarkdownContext = { file: ManualFile; ids: Map<Token, string>; zoom: (src: string) => void }
+type Shot = { src: string; caption: string }
+type MarkdownContext = { file: ManualFile; ids: Map<Token, string>; zoom: (shot: Shot) => void }
 const Context = createContext<MarkdownContext>(null!)
 
 type MarkdownProps = { file: ManualFile; tokens: MarkedToken[] }
 
 /** 把 marked 解析出的手册内容渲染成页面；不渲染文中的 HTML。 */
 export function Markdown({ file, tokens }: MarkdownProps) {
-  const [zoomed, setZoomed] = useState<string>()
+  // 关闭后保留上一张图，退场动画期间图片不消失
+  const [shot, setShot] = useState<Shot>()
+  const [isZoomed, setZoomed] = useState(false)
   const context = useMemo(
     () => ({
       file,
       ids: new Map<Token, string>(file.headings.map((h) => [h.token, h.id])),
-      zoom: setZoomed,
+      zoom: (next: Shot) => {
+        setShot(next)
+        setZoomed(true)
+      },
     }),
     [file],
   )
@@ -30,14 +36,26 @@ export function Markdown({ file, tokens }: MarkdownProps) {
       <div className="text-base leading-[1.85] text-foreground/85 [&>h1+h2]:mt-8 [&>h1+h2]:border-0 [&>h1+h2]:pt-0 [&>h1+p]:text-lg [&>h1+p]:text-muted">
         <Blocks tokens={tokens} />
       </div>
-      <Modal isOpen={zoomed !== undefined} onOpenChange={() => setZoomed(undefined)}>
-        <Modal.Backdrop>
-          <Modal.Container size="cover">
+      {/* 弹窗只包住图片，点图片或四周空白都能关闭 */}
+      <Modal isOpen={isZoomed} onOpenChange={setZoomed}>
+        <Modal.Backdrop variant="blur">
+          <Modal.Container className="justify-center sm:p-8">
             <Modal.Dialog
-              aria-label="查看大图"
-              className="grid place-items-center bg-transparent p-0 shadow-none"
+              aria-label={shot?.caption || '查看大图'}
+              className="flex w-auto max-w-none flex-col items-center gap-3 overflow-visible rounded-none bg-transparent p-0 shadow-none"
             >
-              <img src={zoomed} alt="" className="max-h-full max-w-full rounded-xl" />
+              <Modal.CloseTrigger className="static size-9 self-end rounded-full bg-background/90 shadow-md [&_svg]:size-4.5" />
+              <img
+                src={shot?.src}
+                alt={shot?.caption}
+                onClick={() => setZoomed(false)}
+                className="max-h-[calc(100svh-10rem)] max-w-full cursor-zoom-out rounded-xl shadow-2xl"
+              />
+              {shot?.caption && (
+                <p className="rounded-full bg-background/90 px-3.5 py-1 text-[13px] text-foreground shadow-md">
+                  {shot.caption}
+                </p>
+              )}
             </Modal.Dialog>
           </Modal.Container>
         </Modal.Backdrop>
@@ -103,7 +121,7 @@ function Heading({ token }: { token: Tokens.Heading }) {
   return (
     <H
       id={id}
-      className={`group relative scroll-mt-20 font-semibold text-foreground ${
+      className={`group relative scroll-mt-28 font-semibold text-foreground xl:scroll-mt-20 ${
         H === 'h2'
           ? 'mt-14 mb-4 border-t border-separator pt-7 text-2xl leading-snug tracking-tight'
           : 'mt-9 mb-2.5 text-lg'
@@ -124,25 +142,55 @@ function Heading({ token }: { token: Tokens.Heading }) {
 
 function Figure({ token }: { token: Tokens.Image }) {
   const { file, zoom } = use(Context)
+  const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [width, setWidth] = useState<number>()
   const src = new URL(token.href, file.url).href
+  const frame =
+    'rounded-xl border border-separator shadow-[0_1px_2px_rgb(0_0_0/0.04),0_8px_24px_-12px_rgb(0_0_0/0.12)]'
+
   return (
     <figure className="my-7">
-      <button
-        type="button"
-        onClick={() => zoom(src)}
-        aria-label={`查看大图：${token.text}`}
+      <div
         style={{ width: width && `${Math.min(100, (width / FULL_SHOT_WIDTH) * 100)}%` }}
-        className="mx-auto block w-full cursor-zoom-in"
+        className="relative mx-auto"
       >
-        <img
-          src={src}
-          alt={token.text}
-          loading="lazy"
-          onLoad={(e) => setWidth(e.currentTarget.naturalWidth)}
-          className="block h-auto w-full rounded-xl border border-separator bg-default shadow-[0_1px_2px_rgb(0_0_0/0.04),0_8px_24px_-12px_rgb(0_0_0/0.12)]"
-        />
-      </button>
+        {/* 尺寸未知，先按整窗截图的比例占位 */}
+        {status === 'loading' && <Skeleton className="aspect-[16/10] rounded-xl" />}
+        {status === 'error' ? (
+          <div
+            className={`grid aspect-[16/10] place-content-center justify-items-center gap-3 bg-default text-sm text-muted ${frame}`}
+          >
+            <ImageOff className="size-6" />
+            截图加载失败
+            <Button variant="tertiary" size="sm" onPress={() => setStatus('loading')}>
+              <RotateCw className="size-3.5" />
+              重试
+            </Button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => zoom({ src, caption: token.text })}
+            aria-label={`查看大图：${token.text}`}
+            disabled={status === 'loading'}
+            className={`block w-full cursor-zoom-in overflow-hidden transition-[opacity,translate,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgb(0_0_0/0.04),0_16px_32px_-12px_rgb(0_0_0/0.2)] ${frame} ${
+              status === 'loading' ? 'absolute inset-0 opacity-0' : ''
+            }`}
+          >
+            <img
+              src={src}
+              alt={token.text}
+              loading="lazy"
+              onLoad={(e) => {
+                setWidth(e.currentTarget.naturalWidth)
+                setStatus('done')
+              }}
+              onError={() => setStatus('error')}
+              className="block size-full bg-default"
+            />
+          </button>
+        )}
+      </div>
       {token.text && (
         <figcaption className="mt-2.5 text-center text-[13px] text-muted">{token.text}</figcaption>
       )}

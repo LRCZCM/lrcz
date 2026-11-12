@@ -15,6 +15,8 @@ const MAX_RESULTS = 30
 const SNIPPET_BEFORE = 16
 const SNIPPET_LENGTH = 80
 
+const IS_MAC = /Mac|iPhone|iPad/.test(navigator.userAgent)
+
 // shortcut: 每次搜索遍历全部小节（目前约 150 个），手册明显变大后再换成预建索引。
 function search(sections: SearchSection[], query: string) {
   const q = query.trim().toLowerCase()
@@ -110,7 +112,7 @@ export function ManualSearch({ index }: ManualSearchProps) {
         <Search className="size-4" />
         <span className="max-md:hidden">搜索手册</span>
         <Kbd className="ml-auto max-md:hidden">
-          <Kbd.Content>Ctrl</Kbd.Content>
+          {IS_MAC ? <Kbd.Abbr keyValue="command" /> : <Kbd.Content>Ctrl</Kbd.Content>}
           <Kbd.Content>K</Kbd.Content>
         </Kbd>
       </Button>
