@@ -99,3 +99,11 @@
 - 确认日期：2026-11-17。
 - 决定：`/plugins` 为插件列表，按设计稿 C（列表）制作，不要大标题首屏，顶栏下直接是分类切换与搜索；`/plugins/<插件名小写>` 为插件详情，即该插件的使用手册（首页），各章为 `/plugins/<插件名小写>/<章节>`，模板与 LCML 使用手册一致（共用组件）。每个插件的手册按 LCML 的写法拆章：`README.md` 为引言加“## 目录”（“### 分组名”下列出各章链接），每章一个文件；LcInputLib 的开发者接入文档并入手册作为“开发者”一章。插件信息在私有仓库 `LRCZCM/LcPlugins` 维护：每个插件的手册目录 `docs/manual/<插件名>/` 放 `plugin.json`（中文名、一句话、分类、封面、图标），版本号与下载地址在打开页面时经本站 `/api/plugins/<插件名>.json` 读取 Jenkins 最新成功构建，读不到时用构建网站时记下的；构建时取的是 Jenkins 上该插件任务（`https://jenkins.lrcz.com/job/LcPlugins/job/<插件名>/`）最近一次成功构建的编号（2026-11-17 起，见 LcPlugins 的 DECISIONS“版本号与自动构建”），前置取自 `plugin.yml` 的 `depend`，支持的 Paper 版本为 `api-version` 到 `gradle/libs.versions.toml` 的 `minecraft`。网站构建时用只读令牌 `GITHUB_TOKEN` 把 `docs/manual/` 下载到 `public/plugins-manual/` 并汇总成列表；插件更新后须重新构建部署网站。LcPlugins 是私有仓库，顶栏不放 GitHub 与反馈链接。图标与 LCML 图标同一画法（深色圆角底 `#1F2A44`、白色等轴方块三面配色、品牌橙点缀）：插件板块为“补齐”（大方块缺一角、橙色小方块落入，`src/assets/plugins-icon.svg`），LcInputLib 为“手势轨迹”（准星与渐大的橙点画出 L），工具皮带为插件自带皮带贴图换成品牌橙色；插件图标放在 LcPlugins 各手册目录的 `images/icon.svg`，设计稿在 `.local/drafts/icons/`。
 - 来源：用户在三份设计稿（卡片、陈列、列表）中选 C 并要求去掉大标题；数据选构建时从 LcPlugins 读、每个手册文件夹一份 `plugin.json`；令牌与使用手册共用；首页产品菜单加插件入口；详情页先占位，后定为详情页就是手册、按 LCML 拆章、开发者文档并入手册；图标在三稿中选定插件板块 B、LcInputLib C、工具皮带 C（2026-11-17）。设计稿在 `.local/drafts/plugins/`。
+
+## 插件分发（Jenkins）
+
+- 状态：已确认。
+- 确认日期：2026-11-18。
+- 决定：插件免费公开下载，由部署网站的同一台服务器上的 Jenkins（1Panel 应用，`https://jenkins.lrcz.com`，数据目录 `/1panel/apps/jenkins/jenkins/data`）自动构建分发。文件夹 `LcPlugins` 下每个插件一个流水线任务，版本号即构建编号（规则见 LcPlugins 仓库 DECISIONS 的“版本号与自动构建”）。匿名用户只有全部/Read 与任务/Read：可看构建列表、日志与变更历史（即更新日志）并下载 jar，看不到工作区。服务器上的构建环境：Temurin JDK 25 在 `$JENKINS_HOME/tools/temurin-25`，由 `$JENKINS_HOME/.gradle/gradle.properties` 指给 Gradle；拉取私有仓库用 SSH 部署密钥（GitHub 仓库的 Deploy key 只读，Jenkins 凭据 `github-lcplugins-ssh`，GitHub 主机公钥手动写入“Git Host Key Verification”）。GitHub Webhook 指向 `https://jenkins.lrcz.com/github-webhook/`。
+- 理由：推送即出可下载的版本、访客可选历史版本；Jenkins 与网站同机，网站经本站转发动态读取最新版本。服务器网络实测（2026-11-17）：直连 GitHub 的 HTTPS 不通、SSH（22 端口）可用，Maven 中央仓库、PaperMC 与 Gradle 插件仓库直连可用；清华、阿里云、华为、中科大的 Jenkins 镜像已不提供插件清单 `update-center.json`（只剩插件文件）；gh-proxy 会丢掉认证信息，只能拉公开仓库。因此不用代理、不用公共加速，拉代码走 SSH。
+- 来源：用户提出上传新版本覆盖旧版本并提供下载，讨论后选 Jenkins（服务器 8 核 40G）；要求免费公开、构建编号即版本号、按插件分任务、日志公开无妨、更新日志在 Jenkins 上看；关闭服务器代理后改用 SSH 部署密钥（2026-11-17～18）。
