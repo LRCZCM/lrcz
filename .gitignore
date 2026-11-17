@@ -30,3 +30,6 @@ dist-ssr
 !.env.example
 .claude/skills/
 .claude/settings.local.json
+
+# 构建时下载的 LCML 使用手册
+public/lcml-manual/

@@ -48,8 +48,8 @@
 
 - 状态：已确认。
 - 确认日期：2026-11-11。
-- 决定：直接使用阿里云 ESA Pages 托管；项目根目录的 `esa.jsonc` 配置静态资源目录 `./dist`，`assets.notFoundStrategy` 为 `singlePageApplication`，让未命中静态文件的页面导航请求返回 `index.html`，支持直接访问和刷新前端路由。
-- 来源：用户确认使用 Pages 直接托管，并要求添加配置、提交推送（2026-11-11）；配置依据[阿里云官方文档](https://help.aliyun.com/zh/edge-security-acceleration/esa/user-guide/build-pages)。
+- 决定：部署到自己的国内服务器（Debian + 1Panel + OpenResty，域名已备案）。在本机执行 `npm run build`（需能访问 GitHub，用于下载使用手册），把 `dist/` 的内容手动上传到网站目录；使用手册更新后同样重新构建并上传。OpenResty 须把未知路径回退到 `index.html`，`/lcml-manual/` 下找不到的文件返回 404。
+- 来源：最初用阿里云 ESA Pages 托管（2026-11-11）；用户改为放到自己的国内服务器，先本机构建、手动上传（2026-11-17）。
 
 ## 品牌信息
 
@@ -76,14 +76,14 @@
 
 - 状态：已确认。
 - 确认日期：2026-11-11。
-- 决定：使用手册以 Markdown 写在公开发布仓库 `LRCZCM/LCML-release` 的 `docs/manual/`，网站打开页面时读取并渲染（与更新日志相同，读取来源见下节），路由 `/lcml/manual`（首页，读 README）与 `/lcml/manual/<文件名>`（各章）；LCML 产品页顶栏有“使用手册”入口。章节顺序取自 README“## 目录”中的链接列表，分组以目录里的“### 分组名”为准，README 未写分组时用代码中的默认分组（开始、账号与皮肤、下载、实例、排错与工具、设置与帮助）。Markdown 用 `marked` 解析成标记后由自己的组件渲染，不执行文中的 HTML。界面按 `.local/drafts/lcml/manual.html` 设计稿。
-- 来源：用户提出手册写在 GitHub 公开仓库、以后只更新 MD，网页读取后渲染；设计稿经用户确认后要求按规范做进项目（2026-11-11）。`marked` 为实现时的建议，随设计稿一并确认。
+- 决定：使用手册以 Markdown 写在公开发布仓库 `LRCZCM/LCML-release` 的 `docs/manual/`，网站构建时下载到 `public/lcml-manual/`（含截图）随网站发布，页面从本站读取后渲染；手册更新后须重新构建部署网站，路由 `/lcml/manual`（首页，读 README）与 `/lcml/manual/<文件名>`（各章）；LCML 产品页顶栏有“使用手册”入口。章节顺序取自 README“## 目录”中的链接列表，分组以目录里的“### 分组名”为准，README 未写分组时用代码中的默认分组（开始、账号与皮肤、下载、实例、排错与工具、设置与帮助）。Markdown 用 `marked` 解析成标记后由自己的组件渲染，不执行文中的 HTML。界面按 `.local/drafts/lcml/manual.html` 设计稿。
+- 来源：用户提出手册写在 GitHub 公开仓库、以后只更新 MD，网页读取后渲染；用户希望以后可以把手册放进私有仓库，确认改为构建时下载、手动重新部署（2026-11-17），私有仓库时在构建环境设置只读令牌 `MANUAL_TOKEN`；设计稿经用户确认后要求按规范做进项目（2026-11-11）。`marked` 为实现时的建议，随设计稿一并确认。
 
 ## 发布仓库的国内访问
 
 - 状态：已确认。
 - 确认日期：2026-11-11。
-- 决定：更新日志与使用手册同时向 GitHub 原始文件地址和第三方代理 `https://gh-proxy.org/` 请求，用先返回的一个，之后的文件（含截图）沿用它；只用这两个来源，都失败时提示重试。LCML 产品页的首屏和结尾各加“国内加速下载”按钮，经同一代理直接下载最新版安装包（版本号取自更新日志第一个版本，地址 `releases/download/v版本号/LCML-版本号.exe`），旁边的主按钮（首屏“下载 Windows 版”、结尾“下载 LCML”）从 GitHub 直接下载同一个安装包，不再跳转发布页，读不到更新日志（不知道版本号）时改为新窗口打开发布页；两个顶栏的小“下载”按钮仍跳转发布页。代理是个人维护的公益服务，域名可能被封后更换，失效时改 `src/pages/lcml/release.ts` 中的 `PROXY`。
+- 决定：更新日志同时向 GitHub 原始文件地址和第三方代理 `https://gh-proxy.org/` 请求，用先返回的一个，之后的请求沿用它（使用手册已改为构建时下载，不再经此读取）；只用这两个来源，都失败时提示重试。LCML 产品页的首屏和结尾各加“国内加速下载”按钮，经同一代理直接下载最新版安装包（版本号取自更新日志第一个版本，地址 `releases/download/v版本号/LCML-版本号.exe`），旁边的主按钮（首屏“下载 Windows 版”、结尾“下载 LCML”）从 GitHub 直接下载同一个安装包，不再跳转发布页，读不到更新日志（不知道版本号）时改为新窗口打开发布页；两个顶栏的小“下载”按钮仍跳转发布页。代理是个人维护的公益服务，域名可能被封后更换，失效时改 `src/pages/lcml/release.ts` 中的 `PROXY`。
 - 来源：用户反映国内连 GitHub 有问题；比较了 Gitee 接口（每 IP 每小时 60 次）、阿里云 OSS 同步（用户认为太麻烦）后，用户先选 ghfast 代理并要求加通过代理下载最新版的按钮；随后改用 gh-proxy（文档 https://gh-proxy.com/docs/github-accelerator ），并要求只保留 GitHub 与 gh-proxy，去掉 ghfast 与 jsDelivr（2026-11-11）。
 
 ## LCML 产品页

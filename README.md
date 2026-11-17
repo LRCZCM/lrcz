@@ -28,10 +28,12 @@
 ```bash
 npm install          # 安装依赖
 npm run dev          # 启动开发服务器（http://127.0.0.1:5173）
-npm run build        # 类型检查并构建到 dist/
+npm run build        # 类型检查并构建到 dist/（会从 GitHub 下载 LCML 使用手册）
 npm run preview      # 本地预览构建产物
 npm run typecheck    # 只做类型检查
 npm run lint         # oxlint 检查
 npm run format       # Prettier 格式化全部文件
 npm run check        # 提交前完整检查：类型 + lint + 格式 + 构建
 ```
+
+`npm run dev` 与构建都需要能访问 GitHub。手册放在私有仓库时，先设置只读令牌环境变量 `MANUAL_TOKEN`。部署方式见 [DECISIONS 的部署](docs/context/DECISIONS.md#部署)。

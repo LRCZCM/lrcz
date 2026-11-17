@@ -1,5 +1,4 @@
 import { marked, type MarkedToken, type Token, type Tokens } from 'marked'
-import { fetchReleaseFile } from '../release'
 
 export type ManualHeading = { id: string; depth: number; text: string; token: Tokens.Heading }
 export type ManualFile = { url: string; tokens: MarkedToken[]; headings: ManualHeading[] }
@@ -86,13 +85,23 @@ function parseFile(text: string, url: string): ManualFile {
   return { url, tokens, headings }
 }
 
+// 构建时由 vite.config.ts 从发布仓库下载到这里，随网站一起发布
+const MANUAL_FILES = '/lcml-manual/'
+
+async function fetchManualFile(name: string) {
+  // 重新部署后要读到新内容，每次向服务器确认是否有更新
+  const response = await fetch(MANUAL_FILES + name, { cache: 'no-cache' })
+  if (!response.ok) throw new Error(`${response.url} 返回 ${response.status}`)
+  return parseFile(await response.text(), response.url)
+}
+
 // 手册各章只读一次：页面、首页卡片与搜索共用；失败的不缓存，下次重新读
 const files = new Map<string, Promise<ManualFile>>()
 
 export function loadManualFile(name: string) {
   let file = files.get(name)
   if (!file) {
-    file = fetchReleaseFile(`docs/manual/${name}`).then(({ text, url }) => parseFile(text, url))
+    file = fetchManualFile(name)
     file.catch(() => files.delete(name))
     files.set(name, file)
   }

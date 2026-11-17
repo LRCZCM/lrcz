@@ -22,9 +22,9 @@
 | `src/assets/`     | 两个及以上页面共用的图片（如 LCML 图标）                                                               | 只有一处使用的图片放在该页面目录旁                     | 已建立 |
 | `src/styles/`     | 全局样式入口 `index.css`（引入 Tailwind 与 HeroUI）、主题变量覆盖                                      | 组件样式写在组件的 Tailwind 类名里，不在这里堆页面样式 | 已建立 |
 | `src/api/`        | 请求外部接口的函数与响应类型，一个后端资源一个文件                                                     | 不放界面状态                                           | 待定   |
-| `public/`         | 原样拷贝的静态文件（favicon 等）                                                                       | 需要打包处理的图片放到引用它的页面或组件旁边           | 已建立 |
+| `public/`         | 原样拷贝的静态文件（favicon 等）；`lcml-manual/` 由构建自动下载，不进 Git                              | 需要打包处理的图片放到引用它的页面或组件旁边           | 已建立 |
 
-LCML 产品页在 `src/pages/lcml/`：`LcmlPage` 为页面骨架，`DemoSection` 与 `demo/` 为启动器复原动画（`state.ts` 界面状态、`chapters.ts` 各章脚本、其余为各页面视图），`useChangelog.ts` 读取并解析更新日志，素材放在 `assets/`；`release.ts` 是发布仓库的地址、经代理下载安装包的地址与读取文件（GitHub 与 gh-proxy 代理同时请求、用先返回的）。使用手册 `/lcml/manual` 在 `manual/`：`ManualPage` 为页面骨架，`manual.ts` 读取、解析手册（目录、标题锚点、搜索小节、链接转换），`Markdown.tsx` 把 marked 的解析结果渲染成界面，其余为首页、导航、目录、搜索组件。
+LCML 产品页在 `src/pages/lcml/`：`LcmlPage` 为页面骨架，`DemoSection` 与 `demo/` 为启动器复原动画（`state.ts` 界面状态、`chapters.ts` 各章脚本、其余为各页面视图），`useChangelog.ts` 读取并解析更新日志，素材放在 `assets/`；`release.ts` 是发布仓库的地址、经代理下载安装包的地址与读取文件（GitHub 与 gh-proxy 代理同时请求、用先返回的）。使用手册 `/lcml/manual` 在 `manual/`（内容由 `vite.config.ts` 的 `lcmlManual` 插件在启动开发服务器与构建时下载到 `public/lcml-manual/`）：`ManualPage` 为页面骨架，`manual.ts` 从本站读取、解析手册（目录、标题锚点、搜索小节、链接转换），`Markdown.tsx` 把 marked 的解析结果渲染成界面，其余为首页、导航、目录、搜索组件。
 
 路由用 React Router 的 `BrowserRouter`，路由表写在 `src/app/App.tsx`，一个产品一个路由（如 `/lcml`），未知路径回到首页。全局状态管理、请求库、国际化尚未选型，见 [NOW 的待定事项](NOW.md#待定事项)。
 
