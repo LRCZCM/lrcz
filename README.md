@@ -28,7 +28,7 @@
 ```bash
 npm install          # 安装依赖
 npm run dev          # 启动开发服务器（http://127.0.0.1:5173）
-npm run build        # 类型检查并构建到 dist/（会从 GitHub 下载 LCML 使用手册）
+npm run build        # 类型检查并构建到 dist/（会从 GitHub 下载 LCML 使用手册与插件信息）
 npm run preview      # 本地预览构建产物
 npm run typecheck    # 只做类型检查
 npm run lint         # oxlint 检查
@@ -36,4 +36,4 @@ npm run format       # Prettier 格式化全部文件
 npm run check        # 提交前完整检查：类型 + lint + 格式 + 构建
 ```
 
-`npm run dev` 与构建都需要能访问 GitHub。手册放在私有仓库时，先设置只读令牌环境变量 `MANUAL_TOKEN`。部署方式见 [DECISIONS 的部署](docs/context/DECISIONS.md#部署)。
+`npm run dev` 与构建都需要能访问 GitHub：会下载 LCML 使用手册，以及插件仓库 LcPlugins 的手册、配图与插件信息。LcPlugins 是私有仓库，需要能读取它的 GitHub 只读令牌：在根目录 `.env`（Git 已忽略）写一行 `GITHUB_TOKEN=令牌`，或设置同名环境变量；以后 LCML 手册放进私有仓库也用这个令牌。部署方式见 [DECISIONS 的部署](docs/context/DECISIONS.md#部署)。

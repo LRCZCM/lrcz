@@ -5,3 +5,4 @@
 - [问题当通病修](fix-as-common-defect.md) — 界面问题全项目排查同类，修在共用组件里
 - [不准建 worktree](no-worktree.md) — 只在项目目录改动，未经允许不建 worktree
 - [分支授权](branch-policy.md) — 未经允许不建分支，改动、提交、推送都在 main 上
+- [设计稿用真实 HeroUI](drafts-use-real-heroui.md) — 设计稿用项目组件与现有页面写法，不手写 CSS 模仿

@@ -3,8 +3,12 @@ import { ChevronDown } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import lcmlIcon from '@/assets/lcml-icon.svg'
+import pluginsIcon from '@/assets/plugins-icon.svg'
 
-const products = [{ path: '/lcml', name: 'LCML', description: 'Minecraft 启动器', icon: lcmlIcon }]
+const products = [
+  { path: '/lcml', name: 'LCML', description: 'Minecraft 启动器', icon: lcmlIcon },
+  { path: '/plugins', name: '插件', description: 'Paper 服务端插件', icon: pluginsIcon },
+]
 
 // 鼠标离开后稍等再关，留出从按钮移到面板的时间。
 const CLOSE_DELAY = 200

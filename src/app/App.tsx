@@ -3,6 +3,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { HomePage } from '@/pages/home/HomePage'
 import { LcmlPage } from '@/pages/lcml/LcmlPage'
 import { ManualPage } from '@/pages/lcml/manual/ManualPage'
+import { PluginPage } from '@/pages/plugins/PluginPage'
+import { PluginsPage } from '@/pages/plugins/PluginsPage'
 
 export function App() {
   // 系统开启“减少动效”时，Motion 去掉位移与缩放，只保留淡入。
@@ -13,6 +15,8 @@ export function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/lcml" element={<LcmlPage />} />
           <Route path="/lcml/manual/:chapter?" element={<ManualPage />} />
+          <Route path="/plugins" element={<PluginsPage />} />
+          <Route path="/plugins/:id" element={<PluginPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

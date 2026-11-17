@@ -31,5 +31,6 @@ dist-ssr
 .claude/skills/
 .claude/settings.local.json
 
-# 构建时下载的 LCML 使用手册
+# 构建时下载的 LCML 使用手册与插件手册
 public/lcml-manual/
+public/plugins-manual/
