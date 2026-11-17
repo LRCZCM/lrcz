@@ -55,6 +55,15 @@ function lcmlManual(): Plugin {
 const PLUGINS_REPO = 'LRCZCM/LcPlugins'
 const PLUGINS_OUT = 'public/plugins-manual'
 const PLUGINS_MODULE = 'virtual:plugins'
+// 每个插件在 Jenkins 的 LcPlugins 文件夹下有一个同名构建任务，版本号即最近一次成功构建的编号
+const PLUGINS_JENKINS = 'https://jenkins.lrcz.com/job/LcPlugins/job'
+
+async function latestBuild(name: string) {
+  const url = `${PLUGINS_JENKINS}/${name}/lastSuccessfulBuild/buildNumber`
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`读取插件版本失败：${url} 返回 ${response.status}`)
+  return (await response.text()).trim()
+}
 
 function pick(text: string, pattern: RegExp, where: string) {
   const match = text.match(pattern)
@@ -65,7 +74,7 @@ function pick(text: string, pattern: RegExp, where: string) {
 /**
  * 启动开发服务器与构建时，把 LcPlugins 的 docs/manual/（各插件的手册、配图与 plugin.json）下载到 public/，
  * 并汇总成插件列表，页面从 virtual:plugins 引入（类型见 src/pages/plugins/virtualPlugins.d.ts）。
- * 版本号取自 build.gradle.kts，前置取自 plugin.yml 的 depend，支持的 Paper 版本为 api-version 到仓库编译用的版本。
+ * 版本号取自 Jenkins，前置取自 plugin.yml 的 depend，支持的 Paper 版本为 api-version 到仓库编译用的版本。
  */
 function lcPlugins(): Plugin {
   let list: Promise<unknown[]>
@@ -81,7 +90,6 @@ function lcPlugins(): Plugin {
     return Promise.all(
       names.map(async (name) => {
         const meta = JSON.parse(await readFile(join(PLUGINS_OUT, name, 'plugin.json'), 'utf8'))
-        const gradle = await (await raw(PLUGINS_REPO, `plugins/${name}/build.gradle.kts`)).text()
         const yml = await (
           await raw(PLUGINS_REPO, `plugins/${name}/src/main/resources/plugin.yml`)
         ).text()
@@ -95,7 +103,7 @@ function lcPlugins(): Plugin {
           category: meta.category,
           cover: `/plugins-manual/${name}/${meta.cover}`,
           icon: `/plugins-manual/${name}/${meta.icon}`,
-          version: pick(gradle, /^version = "(.+)"/m, `${name} 的 build.gradle.kts`),
+          version: await latestBuild(name),
           paper: oldest === latest ? oldest : `${oldest}–${latest}`,
           depends: depend.split(',').flatMap((d) => d.trim() || []),
         }
