@@ -7,6 +7,7 @@ import { plugins } from 'virtual:plugins'
 import pluginsIcon from '@/assets/plugins-icon.svg'
 import { site } from '@/app/site'
 import { SiteFooter } from '@/components/SiteFooter'
+import { useLatestBuilds } from './useLatestBuilds'
 
 const ALL = '全部'
 export const LIBRARY = '前置库'
@@ -30,6 +31,7 @@ function rise(delay: number) {
 export function PluginsPage() {
   const [category, setCategory] = useState(ALL)
   const [query, setQuery] = useState('')
+  const latestOf = useLatestBuilds()
   const keyword = query.trim().toLowerCase()
   const shown = sorted.filter(
     (p) =>
@@ -102,6 +104,9 @@ export function PluginsPage() {
                     color={p.category === LIBRARY ? 'warning' : 'accent'}
                   >
                     {p.category}
+                  </Chip>
+                  <Chip size="sm" variant="soft">
+                    v{latestOf(p).version}
                   </Chip>
                   <Chip size="sm" variant="soft">
                     Paper {p.paper}

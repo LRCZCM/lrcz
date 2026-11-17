@@ -28,7 +28,7 @@ LCML 产品页在 `src/pages/lcml/`：`LcmlPage` 为页面骨架，`DemoSection`
 
 手册组件在 `src/components/manual/`，LCML 使用手册与各插件手册共用：每本手册用一个 `ManualSource`（`manual.ts`：手册名、站内路由、文件目录、链接转换、分组图标、提示文字、反馈链接）经 React context 传入；`ManualView` 为页面骨架，`manual.ts` 从本站读取、解析手册（目录、标题锚点、搜索小节、链接转换），`Markdown.tsx` 把 marked 的解析结果渲染成界面，其余为首页、导航、目录、搜索组件。
 
-插件页在 `src/pages/plugins/`：`PluginsPage` 为插件列表（`/plugins`），`PluginPage` 为插件的使用手册（`/plugins/:id/:chapter?`，用共用的手册组件，文中 `../别的插件/xxx.md` 链接转到该插件的手册页）。插件数据由 `vite.config.ts` 的 `lcPlugins` 插件在启动开发服务器与构建时从 LcPlugins 仓库生成，页面从 `virtual:plugins` 引入（类型见 `virtualPlugins.d.ts`），手册与配图下载到 `public/plugins-manual/`。插件入口图标 `src/assets/plugins-icon.svg` 由首页产品菜单与插件页顶栏共用。
+插件页在 `src/pages/plugins/`：`PluginsPage` 为插件列表（`/plugins`），`PluginPage` 为插件的使用手册（`/plugins/:id/:chapter?`，用共用的手册组件，文中 `../别的插件/xxx.md` 链接转到该插件的手册页）。插件数据由 `vite.config.ts` 的 `lcPlugins` 插件在启动开发服务器与构建时从 LcPlugins 仓库生成，页面从 `virtual:plugins` 引入（类型见 `virtualPlugins.d.ts`），手册与配图下载到 `public/plugins-manual/`。`useLatestBuilds.ts` 在打开插件页时经本站 `/api/plugins/<插件名>.json`（服务器 OpenResty 转发到 Jenkins，开发与预览时 vite 转给线上站点）读取最新版本号与下载地址，列表与手册页共用一次请求。插件入口图标 `src/assets/plugins-icon.svg` 由首页产品菜单与插件页顶栏共用。
 
 路由用 React Router 的 `BrowserRouter`，路由表写在 `src/app/App.tsx`，一个产品一个路由（如 `/lcml`），未知路径回到首页。全局状态管理、请求库、国际化尚未选型，见 [NOW 的待定事项](NOW.md#待定事项)。
 

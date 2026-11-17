@@ -1,5 +1,5 @@
-import { Chip } from '@heroui/react'
-import { Code, Gamepad2, LifeBuoy, Rocket, Server } from 'lucide-react'
+import { buttonVariants, Chip } from '@heroui/react'
+import { ArrowUpRight, Code, Gamepad2, LifeBuoy, Rocket, Server } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, Navigate, useParams } from 'react-router'
 import { plugins, type PluginInfo } from 'virtual:plugins'
@@ -8,6 +8,7 @@ import { site } from '@/app/site'
 import { pageRoute, type ManualSource } from '@/components/manual/manual'
 import { ManualView } from '@/components/manual/ManualView'
 import { LIBRARY } from './PluginsPage'
+import { useLatestBuilds } from './useLatestBuilds'
 
 // 手册里链接到任一插件手册的文件（`../LcInputLib/config.md`）都转成该插件的页面
 function route(url: URL) {
@@ -34,7 +35,9 @@ export function PluginPage() {
   const { id, chapter } = useParams()
   const plugin = plugins.find((p) => p.id === id)
   const source = useMemo(() => plugin && manualSource(plugin), [plugin])
+  const latestOf = useLatestBuilds()
   if (!plugin || !source) return <Navigate to="/plugins" replace />
+  const latest = latestOf(plugin)
 
   return (
     <ManualView
@@ -57,13 +60,18 @@ export function PluginPage() {
           </Link>
         </>
       }
+      actions={
+        <a href={latest.download} className={buttonVariants({ size: 'sm' })}>
+          下载
+        </a>
+      }
       intro={
-        <div className="-mt-1 mb-2 flex flex-wrap gap-1.5">
+        <div className="-mt-1 mb-2 flex flex-wrap items-center gap-1.5">
           <Chip size="sm" variant="soft" color={plugin.category === LIBRARY ? 'warning' : 'accent'}>
             {plugin.category}
           </Chip>
           <Chip size="sm" variant="soft">
-            v{plugin.version}
+            v{latest.version}
           </Chip>
           <Chip size="sm" variant="soft">
             Paper {plugin.paper}
@@ -71,6 +79,15 @@ export function PluginPage() {
           <Chip size="sm" variant="soft">
             {plugin.depends.length ? `需要 ${plugin.depends.join('、')}` : '无需前置'}
           </Chip>
+          <a
+            href={plugin.builds}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-1 inline-flex items-center gap-0.5 text-sm text-muted transition-colors hover:text-foreground"
+          >
+            历史版本
+            <ArrowUpRight className="size-3.5" />
+          </a>
         </div>
       }
     />

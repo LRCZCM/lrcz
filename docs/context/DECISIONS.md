@@ -48,7 +48,7 @@
 
 - 状态：已确认。
 - 确认日期：2026-11-11。
-- 决定：部署到自己的国内服务器（Debian + 1Panel + OpenResty，域名已备案）。在本机执行 `npm run build`（需能访问 GitHub 与 `jenkins.lrcz.com`，用于下载使用手册、插件信息与插件版本号），把 `dist/` 的内容手动上传到网站目录；使用手册更新后同样重新构建并上传。OpenResty 须把未知路径回退到 `index.html`，`/lcml-manual/`、`/plugins-manual/` 下找不到的文件返回 404。
+- 决定：部署到自己的国内服务器（Debian + 1Panel + OpenResty，域名已备案）。在本机执行 `npm run build`（需能访问 GitHub 与 `jenkins.lrcz.com`，用于下载使用手册、插件信息与插件版本号），把 `dist/` 的内容手动上传到网站目录；使用手册更新后同样重新构建并上传。OpenResty 须把未知路径回退到 `index.html`，`/lcml-manual/`、`/plugins-manual/` 下找不到的文件返回 404。另有只读转发 `location ~ ^/api/plugins/(Lc[A-Za-z0-9]+)\.json$`（只允许 GET）到本机 Jenkins `http://127.0.0.1:8082/job/LcPlugins/job/$1/lastSuccessfulBuild/api/json?tree=number,url,artifacts%5BrelativePath%5D`，缓存 60 秒，供插件页动态读取版本号与下载地址；这些规则写在 1Panel 该站点的“伪静态”里（2026-11-18 加入）。
 - 来源：最初用阿里云 ESA Pages 托管（2026-11-11）；用户改为放到自己的国内服务器，先本机构建、手动上传（2026-11-17）。
 
 ## 品牌信息
@@ -97,5 +97,5 @@
 
 - 状态：已确认。
 - 确认日期：2026-11-17。
-- 决定：`/plugins` 为插件列表，按设计稿 C（列表）制作，不要大标题首屏，顶栏下直接是分类切换与搜索；`/plugins/<插件名小写>` 为插件详情，即该插件的使用手册（首页），各章为 `/plugins/<插件名小写>/<章节>`，模板与 LCML 使用手册一致（共用组件）。每个插件的手册按 LCML 的写法拆章：`README.md` 为引言加“## 目录”（“### 分组名”下列出各章链接），每章一个文件；LcInputLib 的开发者接入文档并入手册作为“开发者”一章。插件信息在私有仓库 `LRCZCM/LcPlugins` 维护：每个插件的手册目录 `docs/manual/<插件名>/` 放 `plugin.json`（中文名、一句话、分类、封面、图标），版本号为 Jenkins 上该插件任务（`https://jenkins.lrcz.com/job/LcPlugins/job/<插件名>/`）最近一次成功构建的编号（2026-11-17 起，见 LcPlugins 的 DECISIONS“版本号与自动构建”），前置取自 `plugin.yml` 的 `depend`，支持的 Paper 版本为 `api-version` 到 `gradle/libs.versions.toml` 的 `minecraft`。网站构建时用只读令牌 `GITHUB_TOKEN` 把 `docs/manual/` 下载到 `public/plugins-manual/` 并汇总成列表；插件更新后须重新构建部署网站。LcPlugins 是私有仓库，顶栏不放 GitHub 与反馈链接。图标与 LCML 图标同一画法（深色圆角底 `#1F2A44`、白色等轴方块三面配色、品牌橙点缀）：插件板块为“补齐”（大方块缺一角、橙色小方块落入，`src/assets/plugins-icon.svg`），LcInputLib 为“手势轨迹”（准星与渐大的橙点画出 L），工具皮带为插件自带皮带贴图换成品牌橙色；插件图标放在 LcPlugins 各手册目录的 `images/icon.svg`，设计稿在 `.local/drafts/icons/`。
+- 决定：`/plugins` 为插件列表，按设计稿 C（列表）制作，不要大标题首屏，顶栏下直接是分类切换与搜索；`/plugins/<插件名小写>` 为插件详情，即该插件的使用手册（首页），各章为 `/plugins/<插件名小写>/<章节>`，模板与 LCML 使用手册一致（共用组件）。每个插件的手册按 LCML 的写法拆章：`README.md` 为引言加“## 目录”（“### 分组名”下列出各章链接），每章一个文件；LcInputLib 的开发者接入文档并入手册作为“开发者”一章。插件信息在私有仓库 `LRCZCM/LcPlugins` 维护：每个插件的手册目录 `docs/manual/<插件名>/` 放 `plugin.json`（中文名、一句话、分类、封面、图标），版本号与下载地址在打开页面时经本站 `/api/plugins/<插件名>.json` 读取 Jenkins 最新成功构建，读不到时用构建网站时记下的；构建时取的是 Jenkins 上该插件任务（`https://jenkins.lrcz.com/job/LcPlugins/job/<插件名>/`）最近一次成功构建的编号（2026-11-17 起，见 LcPlugins 的 DECISIONS“版本号与自动构建”），前置取自 `plugin.yml` 的 `depend`，支持的 Paper 版本为 `api-version` 到 `gradle/libs.versions.toml` 的 `minecraft`。网站构建时用只读令牌 `GITHUB_TOKEN` 把 `docs/manual/` 下载到 `public/plugins-manual/` 并汇总成列表；插件更新后须重新构建部署网站。LcPlugins 是私有仓库，顶栏不放 GitHub 与反馈链接。图标与 LCML 图标同一画法（深色圆角底 `#1F2A44`、白色等轴方块三面配色、品牌橙点缀）：插件板块为“补齐”（大方块缺一角、橙色小方块落入，`src/assets/plugins-icon.svg`），LcInputLib 为“手势轨迹”（准星与渐大的橙点画出 L），工具皮带为插件自带皮带贴图换成品牌橙色；插件图标放在 LcPlugins 各手册目录的 `images/icon.svg`，设计稿在 `.local/drafts/icons/`。
 - 来源：用户在三份设计稿（卡片、陈列、列表）中选 C 并要求去掉大标题；数据选构建时从 LcPlugins 读、每个手册文件夹一份 `plugin.json`；令牌与使用手册共用；首页产品菜单加插件入口；详情页先占位，后定为详情页就是手册、按 LCML 拆章、开发者文档并入手册；图标在三稿中选定插件板块 B、LcInputLib C、工具皮带 C（2026-11-17）。设计稿在 `.local/drafts/plugins/`。
