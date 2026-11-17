@@ -1,4 +1,6 @@
+import type { LucideIcon } from 'lucide-react'
 import { marked, type MarkedToken, type Token, type Tokens } from 'marked'
+import { createContext, use } from 'react'
 
 export type ManualHeading = { id: string; depth: number; text: string; token: Tokens.Heading }
 export type ManualFile = { url: string; tokens: MarkedToken[]; headings: ManualHeading[] }
@@ -12,25 +14,32 @@ export type ManualIndex = {
 }
 export type SearchSection = { chapter: Chapter; heading: ManualHeading; text: string }
 
-export const MANUAL_PATH = '/lcml/manual'
-export const INDEX_FILE = 'README.md'
-
-// README 的目录里没写“### 分组名”时用这套分组；写了就以 README 为准
-const DEFAULT_GROUPS: Record<string, string[]> = {
-  开始: ['getting-started', 'interface', 'home'],
-  账号与皮肤: ['accounts', 'skin'],
-  下载: ['download-game', 'download-resources', 'modpacks'],
-  实例: [
-    'instances',
-    'instance-content',
-    'worlds-servers',
-    'launch-options',
-    'java',
-    'backup-history',
-  ],
-  排错与工具: ['logs-diagnosis', 'tools'],
-  设置与帮助: ['settings', 'faq'],
+/** 一本手册：放在哪个地址、文件在哪、怎么分组。LCML 使用手册与各插件手册共用同一套页面。 */
+export type ManualSource = {
+  /** 手册名，用于网页标题与面包屑，如“LCML 使用手册”“工具皮带” */
+  name: string
+  /** 手册首页的站内路由，各章为 `${path}/<章节>` */
+  path: string
+  /** 手册文件所在的本站目录（以 / 结尾），构建时下载到这里 */
+  files: string
+  /** 手册文件地址转为站内路由，用于文中链接（可跨手册）；不是手册页面的返回 null */
+  route: (url: URL) => string | null
+  /** README 的目录里没写“### 分组名”时用这套分组 */
+  defaultGroups?: Record<string, string[]>
+  /** 左侧导航各分组的图标，认不出的分组用书本 */
+  groupIcons: Record<string, LucideIcon>
+  /** 首页“第一章”大入口下的小字 */
+  startHint: string
+  /** 搜索框空着时的提示 */
+  searchHint: string
+  /** 章节底部“没找到答案？”后的链接 */
+  feedback: { label: string; href: string }
 }
+
+export const ManualSourceContext = createContext<ManualSource>(null!)
+export const useManualSource = () => use(ManualSourceContext)
+
+export const INDEX_FILE = 'README.md'
 
 /** marked 不加扩展时只产出 MarkedToken，在这里收窄一次类型。 */
 export const asMarked = (tokens: Token[]) => tokens as MarkedToken[]
@@ -85,12 +94,9 @@ function parseFile(text: string, url: string): ManualFile {
   return { url, tokens, headings }
 }
 
-// 构建时由 vite.config.ts 从发布仓库下载到这里，随网站一起发布
-const MANUAL_FILES = '/lcml-manual/'
-
-async function fetchManualFile(name: string) {
+async function fetchManualFile(path: string) {
   // 重新部署后要读到新内容，每次向服务器确认是否有更新
-  const response = await fetch(MANUAL_FILES + name, { cache: 'no-cache' })
+  const response = await fetch(path, { cache: 'no-cache' })
   if (!response.ok) throw new Error(`${response.url} 返回 ${response.status}`)
   return parseFile(await response.text(), response.url)
 }
@@ -98,12 +104,13 @@ async function fetchManualFile(name: string) {
 // 手册各章只读一次：页面、首页卡片与搜索共用；失败的不缓存，下次重新读
 const files = new Map<string, Promise<ManualFile>>()
 
-export function loadManualFile(name: string) {
-  let file = files.get(name)
+/** 读取本站上的一个手册文件，path 如 `/lcml-manual/README.md`。 */
+export function loadManualFile(path: string) {
+  let file = files.get(path)
   if (!file) {
-    file = fetchManualFile(name)
-    file.catch(() => files.delete(name))
-    files.set(name, file)
+    file = fetchManualFile(path)
+    file.catch(() => files.delete(path))
+    files.set(path, file)
   }
   return file
 }
@@ -111,11 +118,16 @@ export function loadManualFile(name: string) {
 export const chapterFile = (id: string) => `${id}.md`
 
 /** 从 README 的“## 目录”读出章节顺序与分组。 */
-export function parseIndex({ tokens }: ManualFile): ManualIndex {
+export function parseIndex(
+  { tokens }: ManualFile,
+  defaultGroups?: Record<string, string[]>,
+): ManualIndex {
   const start = tokens.findIndex(
     (t) => t.type === 'heading' && t.depth === 2 && plainText(t.tokens).trim() === '目录',
   )
-  const end = tokens.findIndex((t, i) => i > start && t.type === 'heading' && t.depth <= 2)
+  const next = tokens.findIndex((t, i) => i > start && t.type === 'heading' && t.depth <= 2)
+  // 目录可能是 README 的最后一节
+  const end = next < 0 ? tokens.length : next
   const toc = tokens.slice(start + 1, end)
 
   const chapters: Chapter[] = []
@@ -129,7 +141,7 @@ export function parseIndex({ tokens }: ManualFile): ManualIndex {
     }
   }
   if (!toc.some((t) => t.type === 'heading')) {
-    const fallback = Object.entries(DEFAULT_GROUPS)
+    const fallback = Object.entries(defaultGroups ?? {})
     for (const c of chapters)
       c.group = fallback.find(([, ids]) => ids.includes(c.id))?.[0] ?? '其他'
   }
@@ -152,14 +164,14 @@ export function searchSections(chapter: Chapter, { tokens, headings }: ManualFil
   return sections
 }
 
-/** 手册内的链接（`xxx.md#标题`、`#标题`）转为站内路由；不是手册页面的返回 null。 */
-export function manualRoute(href: string, file: ManualFile) {
+/** 手册内的链接（`xxx.md#标题`、`../别的手册/xxx.md`、`#标题`）转为站内路由；不是手册页面的返回 null。 */
+export function manualRoute(href: string, file: ManualFile, source: ManualSource) {
   const target = new URL(href, file.url)
-  const dir = new URL('.', file.url).href
-  const path = target.href.split('#')[0]
-  const [, name] = path.startsWith(dir)
-    ? (path.slice(dir.length).match(/^([\w-]+)\.md$/) ?? [])
-    : []
-  if (!name) return null
-  return `${MANUAL_PATH}${name === 'README' ? '' : `/${name}`}${target.hash}`
+  if (target.origin !== location.origin) return null
+  const route = source.route(target)
+  return route && route + target.hash
 }
+
+/** 手册文件名（`README` 或章节名）对应的站内路由。 */
+export const pageRoute = (path: string, name: string) =>
+  name === 'README' ? path : `${path}/${name}`

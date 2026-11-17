@@ -2,7 +2,7 @@ import { MotionConfig } from 'motion/react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { HomePage } from '@/pages/home/HomePage'
 import { LcmlPage } from '@/pages/lcml/LcmlPage'
-import { ManualPage } from '@/pages/lcml/manual/ManualPage'
+import { ManualPage } from '@/pages/lcml/ManualPage'
 import { PluginPage } from '@/pages/plugins/PluginPage'
 import { PluginsPage } from '@/pages/plugins/PluginsPage'
 
@@ -16,7 +16,7 @@ export function App() {
           <Route path="/lcml" element={<LcmlPage />} />
           <Route path="/lcml/manual/:chapter?" element={<ManualPage />} />
           <Route path="/plugins" element={<PluginsPage />} />
-          <Route path="/plugins/:id" element={<PluginPage />} />
+          <Route path="/plugins/:id/:chapter?" element={<PluginPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

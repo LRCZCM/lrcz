@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router'
 import {
   chapterFile,
   loadManualFile,
-  MANUAL_PATH,
   searchSections,
+  useManualSource,
   type ManualIndex,
   type SearchSection,
 } from './manual'
@@ -53,8 +53,8 @@ function snippet(text: string, query: string) {
   return (start ? '…' : '') + text.slice(start, start + SNIPPET_LENGTH)
 }
 
-function sectionRoute({ chapter, heading }: SearchSection) {
-  return `${MANUAL_PATH}/${chapter.id}${heading.depth === 1 ? '' : `#${heading.id}`}`
+function sectionRoute(path: string, { chapter, heading }: SearchSection) {
+  return `${path}/${chapter.id}${heading.depth === 1 ? '' : `#${heading.id}`}`
 }
 
 type ManualSearchProps = { index: ManualIndex }
@@ -62,6 +62,7 @@ type ManualSearchProps = { index: ManualIndex }
 /** 顶栏的搜索按钮与搜索弹窗；第一次打开时读取全部章节。 */
 export function ManualSearch({ index }: ManualSearchProps) {
   const navigate = useNavigate()
+  const { path, files, searchHint } = useManualSource()
   const [isOpen, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [sections, setSections] = useState<SearchSection[]>()
@@ -83,10 +84,10 @@ export function ManualSearch({ index }: ManualSearchProps) {
     // 个别章节读不到时，先搜已读到的
     Promise.allSettled(
       index.chapters.map((c) =>
-        loadManualFile(chapterFile(c.id)).then((f) => searchSections(c, f)),
+        loadManualFile(files + chapterFile(c.id)).then((f) => searchSections(c, f)),
       ),
     ).then((all) => setSections(all.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))))
-  }, [isOpen, sections, index])
+  }, [isOpen, sections, index, files])
 
   const results = useMemo(() => groupByChapter(search(sections ?? [], query)), [sections, query])
 
@@ -96,7 +97,7 @@ export function ManualSearch({ index }: ManualSearchProps) {
   }
 
   const hint = !query.trim()
-    ? '输入关键词，比如“内存”“光影”“崩溃”'
+    ? searchHint
     : !sections
       ? '正在读取手册…'
       : `没有找到“${query.trim()}”`
@@ -149,8 +150,8 @@ export function ManualSearch({ index }: ManualSearchProps) {
                     </Header>
                     {items.map((s) => (
                       <ListBox.Item
-                        key={sectionRoute(s)}
-                        id={sectionRoute(s)}
+                        key={sectionRoute(path, s)}
+                        id={sectionRoute(path, s)}
                         textValue={s.heading.text}
                       >
                         <span className="flex min-w-0 flex-col">

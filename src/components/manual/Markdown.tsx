@@ -3,7 +3,7 @@ import { ArrowUpRight, ImageOff, RotateCw } from 'lucide-react'
 import type { MarkedToken, Token, Tokens } from 'marked'
 import { createContext, use, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { asMarked, manualRoute, plainText, type ManualFile } from './manual'
+import { asMarked, manualRoute, plainText, useManualSource, type ManualFile } from './manual'
 
 // 整窗截图宽 1280，占满正文；弹窗等局部截图按同一比例缩小，不被放大发糊
 const FULL_SHOT_WIDTH = 1280
@@ -359,8 +359,9 @@ const linkClass =
 
 function MarkdownLink({ token }: { token: Tokens.Link }) {
   const { file } = use(Context)
+  const source = useManualSource()
   const children = <Inlines tokens={token.tokens} />
-  const route = manualRoute(token.href, file)
+  const route = manualRoute(token.href, file, source)
   if (route) {
     return (
       <Link to={route} className={linkClass}>

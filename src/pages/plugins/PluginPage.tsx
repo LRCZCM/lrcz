@@ -1,51 +1,78 @@
-import { buttonVariants, Chip } from '@heroui/react'
-import { ArrowLeft } from 'lucide-react'
+import { Chip } from '@heroui/react'
+import { Code, Gamepad2, LifeBuoy, Rocket, Server } from 'lucide-react'
+import { useMemo } from 'react'
 import { Link, Navigate, useParams } from 'react-router'
-import { plugins } from 'virtual:plugins'
-import { SiteFooter } from '@/components/SiteFooter'
+import { plugins, type PluginInfo } from 'virtual:plugins'
+import pluginsIcon from '@/assets/plugins-icon.svg'
+import { site } from '@/app/site'
+import { pageRoute, type ManualSource } from '@/components/manual/manual'
+import { ManualView } from '@/components/manual/ManualView'
 import { LIBRARY } from './PluginsPage'
-import { PluginsHeader } from './PluginsHeader'
 
-/** 插件详情页（占位）：先显示图标、名称与一句话，完整介绍与使用手册待设计。 */
+// 手册里链接到任一插件手册的文件（`../LcInputLib/config.md`）都转成该插件的页面
+function route(url: URL) {
+  const [, name, page] = url.pathname.match(/^\/plugins-manual\/(\w+)\/([\w-]+)\.md$/) ?? []
+  return name ? pageRoute(`/plugins/${name.toLowerCase()}`, page) : null
+}
+
+function manualSource(plugin: PluginInfo): ManualSource {
+  return {
+    name: plugin.title,
+    path: `/plugins/${plugin.id}`,
+    // 构建时由 vite.config.ts 从 LcPlugins 下载到这里
+    files: `/plugins-manual/${plugin.name}/`,
+    route,
+    groupIcons: { 开始: Rocket, 玩法: Gamepad2, 服主: Server, 帮助: LifeBuoy, 开发者: Code },
+    startHint: '第一次用？从这里开始',
+    searchHint: '输入关键词，比如“配置”“命令”',
+    feedback: { label: site.email, href: `mailto:${site.email}` },
+  }
+}
+
+/** 插件页即插件的使用手册：`/plugins/<插件>` 为手册首页，`/plugins/<插件>/<章节>` 为各章。 */
 export function PluginPage() {
-  const { id } = useParams()
+  const { id, chapter } = useParams()
   const plugin = plugins.find((p) => p.id === id)
-  if (!plugin) return <Navigate to="/plugins" replace />
+  const source = useMemo(() => plugin && manualSource(plugin), [plugin])
+  if (!plugin || !source) return <Navigate to="/plugins" replace />
 
   return (
-    <div className="flex min-h-svh flex-col bg-background text-foreground">
-      <title>{`${plugin.title} · 来日创造`}</title>
-      <PluginsHeader />
-      <main className="flex flex-1 flex-col items-center px-4 pt-28 pb-32 text-center">
-        <img
-          src={plugin.icon}
-          alt=""
-          className="size-24 rounded-[22%] shadow-[0_8px_20px_-8px_rgba(0,0,0,0.35)]"
-        />
-        <h1 className="mt-7 text-[clamp(32px,5vw,48px)] font-bold tracking-tight">
-          {plugin.title}
-        </h1>
-        <span className="mt-1 text-muted">
-          {plugin.name} · v{plugin.version}
-        </span>
-        <p className="mt-4 max-w-[420px] text-[17px] leading-relaxed text-balance">
-          {plugin.summary}
-        </p>
-        <div className="mt-4 flex flex-wrap justify-center gap-1.5">
+    <ManualView
+      // 换插件时整页重来，不沿用上一个插件的状态
+      key={plugin.id}
+      source={source}
+      chapter={chapter}
+      brand={
+        <>
+          <Link to="/plugins" className="flex items-center gap-2 font-semibold">
+            <img src={pluginsIcon} alt="" className="size-[22px] rounded-[22%]" />
+            插件
+          </Link>
+          <Link
+            to={source.path}
+            className="-ml-2 flex items-center gap-2 border-l border-separator pl-3 text-muted transition-colors hover:text-foreground max-md:hidden"
+          >
+            <img src={plugin.icon} alt="" className="size-[18px] rounded-[22%]" />
+            {plugin.title}
+          </Link>
+        </>
+      }
+      intro={
+        <div className="-mt-1 mb-2 flex flex-wrap gap-1.5">
           <Chip size="sm" variant="soft" color={plugin.category === LIBRARY ? 'warning' : 'accent'}>
             {plugin.category}
           </Chip>
           <Chip size="sm" variant="soft">
+            v{plugin.version}
+          </Chip>
+          <Chip size="sm" variant="soft">
             Paper {plugin.paper}
           </Chip>
+          <Chip size="sm" variant="soft">
+            {plugin.depends.length ? `需要 ${plugin.depends.join('、')}` : '无需前置'}
+          </Chip>
         </div>
-        <p className="mt-12 text-sm text-muted">详细介绍与使用手册即将上线</p>
-        <Link to="/plugins" className={`mt-4 ${buttonVariants({ variant: 'tertiary' })}`}>
-          <ArrowLeft className="size-4" />
-          返回插件列表
-        </Link>
-      </main>
-      <SiteFooter />
-    </div>
+      }
+    />
   )
 }

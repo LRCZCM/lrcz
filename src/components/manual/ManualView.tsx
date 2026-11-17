@@ -1,19 +1,19 @@
-import { Button, buttonVariants, Drawer, ScrollShadow, Skeleton } from '@heroui/react'
+import { Button, Drawer, ScrollShadow, Skeleton } from '@heroui/react'
 import { ChevronLeft, ChevronRight, Menu } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, Navigate, useLocation, useParams } from 'react-router'
-import lcmlIcon from '@/assets/lcml-icon.svg'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { Link, Navigate, useLocation } from 'react-router'
 import { site } from '@/app/site'
 import { SiteFooter } from '@/components/SiteFooter'
-import { DOWNLOAD_URL, FEEDBACK_URL } from '../release'
 import {
   chapterFile,
   INDEX_FILE,
-  MANUAL_PATH,
+  ManualSourceContext,
   parseIndex,
+  useManualSource,
   type ManualFile,
   type ManualIndex,
+  type ManualSource,
 } from './manual'
 import { ManualHome } from './ManualHome'
 import { ManualNav } from './ManualNav'
@@ -22,11 +22,28 @@ import { ManualToc, ManualTocBar } from './ManualToc'
 import { Markdown } from './Markdown'
 import { useManualFile } from './useManualFile'
 
-const external = { target: '_blank', rel: 'noopener noreferrer' }
+type ManualViewProps = {
+  source: ManualSource
+  /** 当前章节；不传为手册首页 */
+  chapter?: string
+  /** 顶栏“来日创造”之后的品牌区，如产品图标与名称 */
+  brand: ReactNode
+  /** 顶栏右侧搜索框之后的按钮 */
+  actions?: ReactNode
+  /** 手册首页引言之后的内容 */
+  intro?: ReactNode
+}
 
-/** LCML 使用手册：`/lcml/manual` 为首页，`/lcml/manual/<章节>` 为各章，内容读自发布仓库。 */
-export function ManualPage() {
-  const { chapter } = useParams()
+/** 使用手册页面：左侧章节导航、中间正文、右侧本页目录，内容读自 source.files 下的 Markdown。 */
+export function ManualView(props: ManualViewProps) {
+  return (
+    <ManualSourceContext value={props.source}>
+      <ManualLayout {...props} />
+    </ManualSourceContext>
+  )
+}
+
+function ManualLayout({ source, chapter, brand, actions, intro }: ManualViewProps) {
   const { pathname, hash, key } = useLocation()
   const reduceMotion = useReducedMotion()
   const indexFile = useManualFile(INDEX_FILE)
@@ -35,7 +52,10 @@ export function ManualPage() {
   const [navOpenAt, setNavOpenAt] = useState<string>()
 
   const readme = indexFile.state.status === 'done' ? indexFile.state.file : undefined
-  const index = useMemo(() => readme && parseIndex(readme), [readme])
+  const index = useMemo(
+    () => readme && parseIndex(readme, source.defaultGroups),
+    [readme, source.defaultGroups],
+  )
   const current = index?.chapters.find((c) => c.id === chapter)
   const pageFile = page.state.status === 'done' ? page.state.file : undefined
   const ready = Boolean(index && pageFile)
@@ -53,7 +73,7 @@ export function ManualPage() {
     else scrollTo({ top: 0, behavior })
   }, [pathname, hash, key, ready, reduceMotion])
 
-  if (index && chapter && !current) return <Navigate to={MANUAL_PATH} replace />
+  if (index && chapter && !current) return <Navigate to={source.path} replace />
 
   const failed = indexFile.state.status === 'error' || page.state.status === 'error'
   const retry = () => {
@@ -63,7 +83,9 @@ export function ManualPage() {
 
   return (
     <div className="min-h-svh bg-background text-foreground">
-      <title>{current ? `${current.title} · LCML 使用手册` : 'LCML 使用手册 · 来日创造'}</title>
+      <title>
+        {current ? `${current.title} · ${source.name}` : `${source.name} · ${site.nameZh}`}
+      </title>
       <header className="sticky top-0 z-20 border-b border-separator bg-background/80 backdrop-blur-xl backdrop-saturate-150">
         <div className="mx-auto flex h-13 max-w-[1440px] items-center gap-5 px-4 text-sm md:px-6">
           {index && (
@@ -94,21 +116,10 @@ export function ManualPage() {
           <Link to="/" className="text-muted transition-colors hover:text-foreground max-md:hidden">
             {site.nameZh}
           </Link>
-          <Link to="/lcml" className="flex items-center gap-2 font-semibold">
-            <img src={lcmlIcon} alt="" className="size-[22px] rounded-[22%]" />
-            LCML
-          </Link>
-          <Link
-            to={MANUAL_PATH}
-            className="-ml-2 border-l border-separator pl-3 text-muted transition-colors hover:text-foreground max-md:hidden"
-          >
-            使用手册
-          </Link>
+          {brand}
           <div className="ml-auto flex items-center gap-3">
             {index && <ManualSearch index={index} />}
-            <a href={DOWNLOAD_URL} {...external} className={buttonVariants({ size: 'sm' })}>
-              下载
-            </a>
+            {actions}
           </div>
         </div>
       </header>
@@ -146,7 +157,7 @@ export function ManualPage() {
                 {current ? (
                   <ChapterView index={index} chapterId={current.id} file={pageFile} />
                 ) : (
-                  <ManualHome index={index} file={pageFile} />
+                  <ManualHome index={index} file={pageFile} intro={intro} />
                 )}
               </motion.article>
             ) : (
@@ -171,6 +182,7 @@ export function ManualPage() {
 type ChapterViewProps = { index: ManualIndex; chapterId: string; file: ManualFile }
 
 function ChapterView({ index, chapterId, file }: ChapterViewProps) {
+  const { name, path, feedback } = useManualSource()
   const i = index.chapters.findIndex((c) => c.id === chapterId)
   const prev = index.chapters[i - 1]
   const next = index.chapters[i + 1]
@@ -180,8 +192,8 @@ function ChapterView({ index, chapterId, file }: ChapterViewProps) {
   return (
     <>
       <div className="mb-3 flex items-center gap-1.5 text-[13px] text-muted">
-        <Link to={MANUAL_PATH} className="transition-colors hover:text-accent">
-          使用手册
+        <Link to={path} className="transition-colors hover:text-accent">
+          {name}
         </Link>
         <ChevronRight className="size-3.5 opacity-60" />
         {index.chapters[i].group}
@@ -190,7 +202,7 @@ function ChapterView({ index, chapterId, file }: ChapterViewProps) {
 
       <nav aria-label="翻页" className="mt-16 grid gap-3 sm:grid-cols-2">
         {prev && (
-          <Link to={`${MANUAL_PATH}/${prev.id}`} className={pagerClass}>
+          <Link to={`${path}/${prev.id}`} className={pagerClass}>
             <small className="flex items-center gap-1 text-[13px] text-muted">
               <ChevronLeft className="size-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
               上一章
@@ -199,10 +211,7 @@ function ChapterView({ index, chapterId, file }: ChapterViewProps) {
           </Link>
         )}
         {next && (
-          <Link
-            to={`${MANUAL_PATH}/${next.id}`}
-            className={`${pagerClass} text-right sm:col-start-2`}
-          >
+          <Link to={`${path}/${next.id}`} className={`${pagerClass} text-right sm:col-start-2`}>
             <small className="flex items-center justify-end gap-1 text-[13px] text-muted">
               下一章
               <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -213,8 +222,16 @@ function ChapterView({ index, chapterId, file }: ChapterViewProps) {
       </nav>
       <p className="mt-8 flex flex-wrap justify-between gap-4 border-t border-separator pt-5 text-[13px] text-muted">
         没找到答案？
-        <a href={FEEDBACK_URL} {...external} className="text-accent hover:underline">
-          在 Issues 提问
+        <a
+          href={feedback.href}
+          // 网页链接新窗口打开；邮件地址直接唤起邮件程序
+          {...(feedback.href.startsWith('http') && {
+            target: '_blank',
+            rel: 'noopener noreferrer',
+          })}
+          className="text-accent hover:underline"
+        >
+          {feedback.label}
         </a>
       </p>
     </>
