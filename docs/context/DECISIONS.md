@@ -47,9 +47,10 @@
 ## 部署
 
 - 状态：已确认。
-- 确认日期：2026-11-11。
-- 决定：部署到自己的国内服务器（Debian + 1Panel + OpenResty，域名已备案）。在本机执行 `npm run build`（需能访问 GitHub 与 `jenkins.lrcz.com`，用于下载使用手册、插件信息与插件版本号），把 `dist/` 的内容手动上传到网站目录；使用手册更新后同样重新构建并上传。OpenResty 须把未知路径回退到 `index.html`，`/lcml-manual/`、`/plugins-manual/` 下找不到的文件返回 404。另有只读转发 `location ~ ^/api/plugins/(Lc[A-Za-z0-9]+)\.json$`（只允许 GET）到本机 Jenkins `http://127.0.0.1:8082/job/LcPlugins/job/$1/lastSuccessfulBuild/api/json?tree=number,url,artifacts%5BrelativePath%5D`，缓存 60 秒，供插件页动态读取版本号与下载地址；这些规则写在 1Panel 该站点的“伪静态”里（2026-11-18 加入）。
-- 来源：最初用阿里云 ESA Pages 托管（2026-11-11）；用户改为放到自己的国内服务器，先本机构建、手动上传（2026-11-17）。
+- 确认日期：2026-11-18。
+- 决定：部署到自己的国内服务器（Debian + 1Panel + OpenResty，域名已备案），由同机 Jenkins 自动构建发布：lrcz 推送到 main，或 LCML-release、LcPlugins 的 `docs/manual/` 有改动时，任务 `lrcz-website` 执行 `npm ci` 与完整的 `npm run check`，通过后才替换线上目录，上一版留作 `index.prev`；失败时线上不变。构建流程写在仓库的 `Jenkinsfile`，服务器搭建、凭据、伪静态与换服务器步骤只记在 [DEPLOY](DEPLOY.md)。构建经 `api.github.com` 读取手册与插件信息（服务器连不上 `raw.githubusercontent.com`），Jenkins 拉取全部仓库用 GitHub 账号 LRCZCM 的 SSH 密钥（凭据 `github-lrczcm-ssh`）。OpenResty 须把未知路径回退到 `index.html`，手册目录下找不到的文件返回 404，`/api/plugins/` 只读转发到 Jenkins；本机构建、手动上传 `dist/` 作为备用。
+- 理由：推送即上线，改文档不必再手动部署；部署前完整检查挡住有问题的提交；Jenkins 与网站同机，部署只是本机复制，不需要把服务器登录凭据交给外部服务（因此不选 GitHub Actions）。拉代码用账号密钥而非各仓库只读部署密钥，是用户为省去逐仓库配置做的取舍，该密钥只放 Jenkins 凭据。
+- 来源：最初用阿里云 ESA Pages 托管（2026-11-11）；用户改为放到自己的国内服务器，先本机构建、手动上传（2026-11-17）；用户要求全自动流程，选 Jenkins 方案并要求部署前跑完整检查，要求所有仓库统一用账号最高权限的 SSH 密钥，部署流程只保存在本仓库（2026-11-18）。
 
 ## 品牌信息
 
@@ -76,7 +77,7 @@
 
 - 状态：已确认。
 - 确认日期：2026-11-11。
-- 决定：使用手册以 Markdown 写在公开发布仓库 `LRCZCM/LCML-release` 的 `docs/manual/`，网站构建时下载到 `public/lcml-manual/`（含截图）随网站发布，页面从本站读取后渲染；手册更新后须重新构建部署网站，路由 `/lcml/manual`（首页，读 README）与 `/lcml/manual/<文件名>`（各章）；LCML 产品页顶栏有“使用手册”入口。章节顺序取自 README“## 目录”中的链接列表，分组以目录里的“### 分组名”为准，README 未写分组时用代码中的默认分组（开始、账号与皮肤、下载、实例、排错与工具、设置与帮助）。Markdown 用 `marked` 解析成标记后由自己的组件渲染，不执行文中的 HTML。界面按 `.local/drafts/lcml/manual.html` 设计稿。
+- 决定：使用手册以 Markdown 写在公开发布仓库 `LRCZCM/LCML-release` 的 `docs/manual/`，网站构建时下载到 `public/lcml-manual/`（含截图）随网站发布，页面从本站读取后渲染；手册更新后网站自动重新构建部署（见[部署](#部署)），路由 `/lcml/manual`（首页，读 README）与 `/lcml/manual/<文件名>`（各章）；LCML 产品页顶栏有“使用手册”入口。章节顺序取自 README“## 目录”中的链接列表，分组以目录里的“### 分组名”为准，README 未写分组时用代码中的默认分组（开始、账号与皮肤、下载、实例、排错与工具、设置与帮助）。Markdown 用 `marked` 解析成标记后由自己的组件渲染，不执行文中的 HTML。界面按 `.local/drafts/lcml/manual.html` 设计稿。
 - 来源：用户提出手册写在 GitHub 公开仓库、以后只更新 MD，网页读取后渲染；用户希望以后可以把手册放进私有仓库，确认改为构建时下载、手动重新部署（2026-11-17），私有仓库时在构建环境设置只读令牌（2026-11-17 起与插件共用 `GITHUB_TOKEN`）；设计稿经用户确认后要求按规范做进项目（2026-11-11）。`marked` 为实现时的建议，随设计稿一并确认。
 
 ## 发布仓库的国内访问
@@ -97,13 +98,13 @@
 
 - 状态：已确认。
 - 确认日期：2026-11-17。
-- 决定：`/plugins` 为插件列表，按设计稿 C（列表）制作，不要大标题首屏，顶栏下直接是分类切换与搜索；`/plugins/<插件名小写>` 为插件详情，即该插件的使用手册（首页），各章为 `/plugins/<插件名小写>/<章节>`，模板与 LCML 使用手册一致（共用组件）。每个插件的手册按 LCML 的写法拆章：`README.md` 为引言加“## 目录”（“### 分组名”下列出各章链接），每章一个文件；LcInputLib 的开发者接入文档并入手册作为“开发者”一章。插件信息在私有仓库 `LRCZCM/LcPlugins` 维护：每个插件的手册目录 `docs/manual/<插件名>/` 放 `plugin.json`（中文名、一句话、分类、封面、图标），版本号与下载地址在打开页面时经本站 `/api/plugins/<插件名>.json` 读取 Jenkins 最新成功构建，读不到时用构建网站时记下的；构建时取的是 Jenkins 上该插件任务（`https://jenkins.lrcz.com/job/LcPlugins/job/<插件名>/`）最近一次成功构建的编号（2026-11-17 起，见 LcPlugins 的 DECISIONS“版本号与自动构建”），前置取自 `plugin.yml` 的 `depend`，支持的 Paper 版本为 `api-version` 到 `gradle/libs.versions.toml` 的 `minecraft`。网站构建时用只读令牌 `GITHUB_TOKEN` 把 `docs/manual/` 下载到 `public/plugins-manual/` 并汇总成列表；插件更新后须重新构建部署网站。LcPlugins 是私有仓库，顶栏不放 GitHub 与反馈链接。图标与 LCML 图标同一画法（深色圆角底 `#1F2A44`、白色等轴方块三面配色、品牌橙点缀）：插件板块为“补齐”（大方块缺一角、橙色小方块落入，`src/assets/plugins-icon.svg`），LcInputLib 为“手势轨迹”（准星与渐大的橙点画出 L），工具皮带为插件自带皮带贴图换成品牌橙色；插件图标放在 LcPlugins 各手册目录的 `images/icon.svg`，设计稿在 `.local/drafts/icons/`。
+- 决定：`/plugins` 为插件列表，按设计稿 C（列表）制作，不要大标题首屏，顶栏下直接是分类切换与搜索；`/plugins/<插件名小写>` 为插件详情，即该插件的使用手册（首页），各章为 `/plugins/<插件名小写>/<章节>`，模板与 LCML 使用手册一致（共用组件）。每个插件的手册按 LCML 的写法拆章：`README.md` 为引言加“## 目录”（“### 分组名”下列出各章链接），每章一个文件；LcInputLib 的开发者接入文档并入手册作为“开发者”一章。插件信息在私有仓库 `LRCZCM/LcPlugins` 维护：每个插件的手册目录 `docs/manual/<插件名>/` 放 `plugin.json`（中文名、一句话、分类、封面、图标），版本号与下载地址在打开页面时经本站 `/api/plugins/<插件名>.json` 读取 Jenkins 最新成功构建，读不到时用构建网站时记下的；构建时取的是 Jenkins 上该插件任务（`https://jenkins.lrcz.com/job/LcPlugins/job/<插件名>/`）最近一次成功构建的编号（2026-11-17 起，见 LcPlugins 的 DECISIONS“版本号与自动构建”），前置取自 `plugin.yml` 的 `depend`，支持的 Paper 版本为 `api-version` 到 `gradle/libs.versions.toml` 的 `minecraft`。网站构建时用只读令牌 `GITHUB_TOKEN` 把 `docs/manual/` 下载到 `public/plugins-manual/` 并汇总成列表；手册或 `plugin.json` 更新后网站自动重新构建部署，插件代码更新不需要重新部署网站。LcPlugins 是私有仓库，顶栏不放 GitHub 与反馈链接。图标与 LCML 图标同一画法（深色圆角底 `#1F2A44`、白色等轴方块三面配色、品牌橙点缀）：插件板块为“补齐”（大方块缺一角、橙色小方块落入，`src/assets/plugins-icon.svg`），LcInputLib 为“手势轨迹”（准星与渐大的橙点画出 L），工具皮带为插件自带皮带贴图换成品牌橙色；插件图标放在 LcPlugins 各手册目录的 `images/icon.svg`，设计稿在 `.local/drafts/icons/`。
 - 来源：用户在三份设计稿（卡片、陈列、列表）中选 C 并要求去掉大标题；数据选构建时从 LcPlugins 读、每个手册文件夹一份 `plugin.json`；令牌与使用手册共用；首页产品菜单加插件入口；详情页先占位，后定为详情页就是手册、按 LCML 拆章、开发者文档并入手册；图标在三稿中选定插件板块 B、LcInputLib C、工具皮带 C（2026-11-17）。设计稿在 `.local/drafts/plugins/`。
 
 ## 插件分发（Jenkins）
 
 - 状态：已确认。
 - 确认日期：2026-11-18。
-- 决定：插件免费公开下载，由部署网站的同一台服务器上的 Jenkins（1Panel 应用，`https://jenkins.lrcz.com`，数据目录 `/1panel/apps/jenkins/jenkins/data`）自动构建分发。文件夹 `LcPlugins` 下每个插件一个流水线任务，版本号即构建编号（规则见 LcPlugins 仓库 DECISIONS 的“版本号与自动构建”）。匿名用户只有全部/Read 与任务/Read：可看构建列表、日志与变更历史（即更新日志）并下载 jar，看不到工作区。服务器上的构建环境：Temurin JDK 25 在 `$JENKINS_HOME/tools/temurin-25`，由 `$JENKINS_HOME/.gradle/gradle.properties` 指给 Gradle；拉取私有仓库用 SSH 部署密钥（GitHub 仓库的 Deploy key 只读，Jenkins 凭据 `github-lcplugins-ssh`，GitHub 主机公钥手动写入“Git Host Key Verification”）。GitHub Webhook 指向 `https://jenkins.lrcz.com/github-webhook/`。
+- 决定：插件免费公开下载，由部署网站的同一台服务器上的 Jenkins（1Panel 应用，`https://jenkins.lrcz.com`，数据目录 `/1panel/apps/jenkins/jenkins/data`）自动构建分发。文件夹 `LcPlugins` 下每个插件一个流水线任务，版本号即构建编号（规则见 LcPlugins 仓库 DECISIONS 的“版本号与自动构建”）。匿名用户只有全部/Read 与任务/Read：可看构建列表、日志与变更历史（即更新日志）并下载 jar，看不到工作区。服务器上的构建环境、凭据、任务配置与 Webhook 见 [DEPLOY](DEPLOY.md)；拉取 LcPlugins 用账号 SSH 密钥 `github-lrczcm-ssh`（2026-11-18 起，此前为该仓库的只读部署密钥）。
 - 理由：推送即出可下载的版本、访客可选历史版本；Jenkins 与网站同机，网站经本站转发动态读取最新版本。服务器网络实测（2026-11-17）：直连 GitHub 的 HTTPS 不通、SSH（22 端口）可用，Maven 中央仓库、PaperMC 与 Gradle 插件仓库直连可用；清华、阿里云、华为、中科大的 Jenkins 镜像已不提供插件清单 `update-center.json`（只剩插件文件）；gh-proxy 会丢掉认证信息，只能拉公开仓库。因此不用代理、不用公共加速，拉代码走 SSH。
-- 来源：用户提出上传新版本覆盖旧版本并提供下载，讨论后选 Jenkins（服务器 8 核 40G）；要求免费公开、构建编号即版本号、按插件分任务、日志公开无妨、更新日志在 Jenkins 上看；关闭服务器代理后改用 SSH 部署密钥（2026-11-17～18）。
+- 来源：用户提出上传新版本覆盖旧版本并提供下载，讨论后选 Jenkins（服务器 8 核 40G）；要求免费公开、构建编号即版本号、按插件分任务、日志公开无妨、更新日志在 Jenkins 上看；关闭服务器代理后改用 SSH 部署密钥（2026-11-17～18），后按用户要求统一换成账号 SSH 密钥（2026-11-18）。

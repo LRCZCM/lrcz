@@ -9,7 +9,7 @@
 - LCML 产品页 `/lcml` 已按设计稿方案 A 完成，用户已验收：首屏与下载按钮（GitHub 直接下载与 gh-proxy 国内加速）、启动器界面复原动画（七章）、功能卡片、更新日志（打开页面时读取 LCML-release 的 CHANGELOG.md）、下载与反馈入口。
 - LCML 使用手册 `/lcml/manual` 已完成（待用户验收）：构建时从 LCML-release 的 `docs/manual/` 下载、随网站发布；左侧分组导航、右侧本页目录、全文搜索、手机端抽屉、截图看大图。手册组件在 `src/components/manual/`，与插件手册共用。
 - 插件页已完成，用户已实测：列表 `/plugins`（设计稿 C，分类、搜索、版本标签），详情即插件使用手册 `/plugins/<插件>`（与 LCML 手册同一套组件），顶栏“下载”直接下载 Jenkins 最新成功构建的 jar，标签后“历史版本”链到 Jenkins 构建列表。插件信息与手册在构建时从私有仓库 LcPlugins 读取（令牌 `GITHUB_TOKEN`）；版本号与下载地址打开页面时经本站 `/api/plugins/<插件名>.json` 动态读取，插件更新后不必重新部署网站。图标：插件板块“补齐”、LcInputLib“手势轨迹”、工具皮带“橙色像素皮带”。
-- 部署在自有国内服务器（1Panel + OpenResty）：本机构建、手动上传 `dist/`；伪静态含 SPA 回退、手册目录 404 与 `/api/plugins/` 只读转发，见 [DECISIONS 的部署](DECISIONS.md#部署)。插件由同一服务器上的 Jenkins 自动构建分发，见 [DECISIONS 的插件分发](DECISIONS.md#插件分发jenkins)。整理前的逐条记录见 [NOW-2026-11-18](../archive/NOW-2026-11-18.md)。
+- 部署在自有国内服务器（1Panel + OpenResty），由同机 Jenkins 任务 `lrcz-website` 自动构建部署，流程与换服务器步骤见 [DEPLOY](DEPLOY.md)。插件由同一服务器上的 Jenkins 自动构建分发，见 [DECISIONS 的插件分发](DECISIONS.md#插件分发jenkins)。整理前的逐条记录见 [NOW-2026-11-18](../archive/NOW-2026-11-18.md)。
 
 ## 待人工验证
 
@@ -27,10 +27,10 @@
 - 国际化：是否需要多语言。
 - 主题定制（品牌色、字体）与深色模式切换方式。
 - 测试框架（建议首次需要时引入 Vitest）。
-- 网站自动部署：建议以后由 Jenkins 构建并发布网站；目前服务器 HTTPS 连不上 GitHub，构建时下载手册的方式需先改，暂缓。
 
 ## 近期记录
 
 - 2026-11-17：重测服务器网络，`github.com` 与 `api.github.com` 的 HTTPS 已可直连，只有 `raw.githubusercontent.com` 仍不通；npm 官方源与 npmmirror 可用，Docker Hub 直连不通（已配镜像）。网站自动部署方案见待定事项，待用户定。
 - 2026-11-17：网站自动部署按 Jenkins 方案实施（用户确认，部署前跑完整 `npm run check`）。`vite.config.ts` 改为经 `api.github.com` 读文件；新增 `Jenkinsfile`；服务器 Jenkins 装 Node 24（`$JENKINS_HOME/tools/node-24`），新建任务 `lrcz-website`（复用凭据 `github-lcplugins` 作 `GITHUB_TOKEN`），部署经 `docker cp` 到 OpenResty 容器，上一版留 `index.prev`。已在服务器按同样步骤试构建、试部署成功；待推送 Jenkinsfile 与配置 Webhook 后实测自动触发，测过再写入 DECISIONS“部署”。
 - 2026-11-18：服务器上 git 走 HTTPS 连 github.com 会卡住，网站任务改用 SSH 拉取。按用户要求，Jenkins 拉取全部仓库（lrcz、LCML-release、LcPlugins 及两个插件任务）统一用 LRCZCM 账号的 SSH 密钥（凭据 `github-lrczcm-ssh`，取自服务器 `/root/.ssh/id_ed25519`），删除原 LcPlugins 部署密钥凭据 `github-lcplugins-ssh`；插件任务配置改前备份为 `config.xml.bak-20261118`。插件列表每行加“下载最新版”“历史版本”按钮。
+- 2026-11-18：用户实测通过：自动部署（lrcz 与手册仓库推送均自动构建部署）、插件列表的下载与历史版本按钮。部署流程、涉及仓库与换服务器步骤写入 [DEPLOY](DEPLOY.md)，DECISIONS“部署”“插件分发”同步更新。

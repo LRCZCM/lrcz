@@ -11,4 +11,4 @@ metadata:
 
 **Why:** 用户搭 Jenkins 时给了 SSH 并说“你帮我操作”，嫌多步网页配置“太麻烦”（2026-11-17）。
 
-**How to apply:** 连接方式（`ssh lrcz` 免密）与目录见 `.local/ENVIRONMENT.md`；服务器事实与现状记在 LRCZ 的 DECISIONS“部署”“插件分发（Jenkins）”。相关：[[verify-before-recommend]]。
+**How to apply:** 连接方式（`ssh lrcz` 免密）与目录见 `.local/ENVIRONMENT.md`；服务器搭建、Jenkins、凭据与换服务器步骤只记在 `docs/context/DEPLOY.md`（部署流程只存本仓库，用户 2026-11-18 要求）。相关：[[verify-before-recommend]]。

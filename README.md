@@ -36,4 +36,4 @@ npm run format       # Prettier 格式化全部文件
 npm run check        # 提交前完整检查：类型 + lint + 格式 + 构建
 ```
 
-`npm run dev` 与构建都需要能访问 GitHub：会下载 LCML 使用手册，以及插件仓库 LcPlugins 的手册、配图与插件信息。LcPlugins 是私有仓库，需要能读取它的 GitHub 只读令牌：在根目录 `.env`（Git 已忽略）写一行 `GITHUB_TOKEN=令牌`，或设置同名环境变量；以后 LCML 手册放进私有仓库也用这个令牌。部署方式见 [DECISIONS 的部署](docs/context/DECISIONS.md#部署)。
+`npm run dev` 与构建都需要能访问 GitHub：会下载 LCML 使用手册，以及插件仓库 LcPlugins 的手册、配图与插件信息。LcPlugins 是私有仓库，需要能读取它的 GitHub 只读令牌：在根目录 `.env`（Git 已忽略）写一行 `GITHUB_TOKEN=令牌`，或设置同名环境变量；以后 LCML 手册放进私有仓库也用这个令牌。服务器上由 Jenkins 自动构建部署，流程与换服务器步骤见 [DEPLOY](docs/context/DEPLOY.md)。
