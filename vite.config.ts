@@ -5,12 +5,12 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 
-// 读取私有仓库（如 LcPlugins）需要只读令牌 GITHUB_TOKEN，写在 .env 或环境变量里；只在本机构建时使用，不会进入网页
+// 读取私有仓库（如 LcPlugins）需要只读令牌 GITHUB_TOKEN，写在 .env 或环境变量里（服务器上由 Jenkins 凭据提供）；只在构建时使用，不会进入网页
 const token = loadEnv('', import.meta.dirname, 'GITHUB_').GITHUB_TOKEN
-const headers = token ? { Authorization: `Bearer ${token}` } : undefined
+const auth = token ? { Authorization: `Bearer ${token}` } : undefined
 
-async function get(url: string) {
-  const response = await fetch(url, { headers })
+async function get(url: string, headers?: Record<string, string>) {
+  const response = await fetch(url, { headers: { ...auth, ...headers } })
   if (!response.ok) {
     const hint = response.status === 404 && !token ? '（私有仓库需设置 GITHUB_TOKEN）' : ''
     throw new Error(`读取 GitHub 失败：${url} 返回 ${response.status}${hint}`)
@@ -18,8 +18,11 @@ async function get(url: string) {
   return response
 }
 
+// 文件经 api.github.com 读取：服务器（Jenkins）连不上 raw.githubusercontent.com
 const raw = (repo: string, path: string) =>
-  get(`https://raw.githubusercontent.com/${repo}/main/${path}`)
+  get(`https://api.github.com/repos/${repo}/contents/${path}?ref=main`, {
+    Accept: 'application/vnd.github.raw',
+  })
 
 /** 把仓库 main 分支 dir 目录下的全部文件下载到 out，返回各文件相对 dir 的路径。 */
 async function downloadDir(repo: string, dir: string, out: string) {

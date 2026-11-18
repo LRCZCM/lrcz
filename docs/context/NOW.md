@@ -30,3 +30,6 @@
 - 网站自动部署：建议以后由 Jenkins 构建并发布网站；目前服务器 HTTPS 连不上 GitHub，构建时下载手册的方式需先改，暂缓。
 
 ## 近期记录
+
+- 2026-11-17：重测服务器网络，`github.com` 与 `api.github.com` 的 HTTPS 已可直连，只有 `raw.githubusercontent.com` 仍不通；npm 官方源与 npmmirror 可用，Docker Hub 直连不通（已配镜像）。网站自动部署方案见待定事项，待用户定。
+- 2026-11-17：网站自动部署按 Jenkins 方案实施（用户确认，部署前跑完整 `npm run check`）。`vite.config.ts` 改为经 `api.github.com` 读文件；新增 `Jenkinsfile`；服务器 Jenkins 装 Node 24（`$JENKINS_HOME/tools/node-24`），新建任务 `lrcz-website`（复用凭据 `github-lcplugins` 作 `GITHUB_TOKEN`），部署经 `docker cp` 到 OpenResty 容器，上一版留 `index.prev`。已在服务器按同样步骤试构建、试部署成功；待推送 Jenkinsfile 与配置 Webhook 后实测自动触发，测过再写入 DECISIONS“部署”。
