@@ -58,23 +58,23 @@ function lcmlManual(): Plugin {
 const PLUGINS_REPO = 'LRCZCM/LcPlugins'
 const PLUGINS_OUT = 'public/plugins-manual'
 const PLUGINS_MODULE = 'virtual:plugins'
-// 每个插件在 Jenkins 的 LcPlugins 文件夹下有一个同名构建任务，版本号即最近一次成功构建的编号
+// 每个插件在 Jenkins 的 LcPlugins 文件夹下有一个同名构建任务，版本号为最近一次成功构建的名称（主版本.构建编号，如 1.37）
 const PLUGINS_JENKINS = 'https://jenkins.lrcz.com/job/LcPlugins/job'
 
 /** 插件最近一次成功构建的版本号、jar 下载地址与全部构建（历史版本）页面。 */
 async function latestBuild(name: string) {
-  const api = `${PLUGINS_JENKINS}/${name}/lastSuccessfulBuild/api/json?tree=number,url,artifacts[relativePath]`
+  const api = `${PLUGINS_JENKINS}/${name}/lastSuccessfulBuild/api/json?tree=displayName,url,artifacts[relativePath]`
   const response = await fetch(api)
   if (!response.ok) throw new Error(`读取插件构建失败：${api} 返回 ${response.status}`)
   const build = (await response.json()) as {
-    number: number
+    displayName: string
     url: string
     artifacts: { relativePath: string }[]
   }
   const [jar] = build.artifacts
   if (!jar) throw new Error(`读取插件构建失败：${build.url} 没有构建产物`)
   return {
-    version: String(build.number),
+    version: build.displayName,
     download: `${build.url}artifact/${jar.relativePath}`,
     builds: `${PLUGINS_JENKINS}/${name}/`,
   }

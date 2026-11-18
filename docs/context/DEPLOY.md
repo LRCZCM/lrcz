@@ -61,7 +61,7 @@ location /plugins-manual/ {
 # 插件页动态读取最新版本号与下载地址：只读转发到 Jenkins 上该插件“最近一次成功构建”的接口
 location ~ ^/api/plugins/(Lc[A-Za-z0-9]+)\.json$ {
     limit_except GET { deny all; }
-    proxy_pass http://127.0.0.1:8082/job/LcPlugins/job/$1/lastSuccessfulBuild/api/json?tree=number,url,artifacts%5BrelativePath%5D;
+    proxy_pass http://127.0.0.1:8082/job/LcPlugins/job/$1/lastSuccessfulBuild/api/json?tree=displayName,url,artifacts%5BrelativePath%5D;
     proxy_set_header Host jenkins.lrcz.com;
     proxy_hide_header Set-Cookie;
     proxy_hide_header X-Jenkins;

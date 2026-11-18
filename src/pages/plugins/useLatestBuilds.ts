@@ -8,13 +8,13 @@ async function fetchLatest(name: string): Promise<Latest> {
   const response = await fetch(`/api/plugins/${name}.json`)
   if (!response.ok) throw new Error(`读取 ${name} 最新构建失败：${response.status}`)
   const build = (await response.json()) as {
-    number: number
+    displayName: string
     url: string
     artifacts: { relativePath: string }[]
   }
   const [jar] = build.artifacts
   if (!jar) throw new Error(`${name} 最新构建没有 jar`)
-  return { version: String(build.number), download: `${build.url}artifact/${jar.relativePath}` }
+  return { version: build.displayName, download: `${build.url}artifact/${jar.relativePath}` }
 }
 
 // 打开插件页后才请求，列表与手册页共用一次结果；单个插件读不到时用构建网站时记下的版本
