@@ -148,7 +148,7 @@ lrcz、LCML-release、LcPlugins 三个仓库各加一个：Settings → Webhooks
 
 ### 8. 首次运行与验收
 
-1. 每个任务手动“立即构建”一次。触发判断要和上一次构建比较，没有构建记录时 Webhook 只会触发首次构建。
+1. 每个任务手动“立即构建”一次。Jenkins 判断有无改动时，用的是上一次构建记下的仓库地址与凭据；没有构建记录，或改了任务的仓库地址、凭据之后，都要先手动构建一次，Webhook 才能正常触发。
 2. 依次验证：
    - lrcz 推送一次，`lrcz-website` 自动构建成功，`https://www.lrcz.com/`、`/lcml`、`/plugins`、`/lcml/manual` 正常，`/lcml-manual/不存在.png` 返回 404，`/api/plugins/LcInputLib.json` 返回 JSON。
    - LCML-release 或 LcPlugins 改一处 `docs/manual/` 并推送，网站自动更新。
