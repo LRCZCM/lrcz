@@ -26,7 +26,7 @@ pipeline {
             branches: [[name: 'main']],
             userRemoteConfigs: [[url: 'git@github.com:LRCZCM/LCML-release.git', credentialsId: 'github-lrczcm-ssh']],
             extensions: [
-              pathRestriction(includedRegions: 'docs/manual/.*', excludedRegions: ''),
+              [$class: 'PathRestriction', includedRegions: 'docs/manual/.*', excludedRegions: ''],
               sparseCheckout(sparseCheckoutPaths: [[path: 'docs/manual']]),
               cloneOption(shallow: true, depth: 1, noTags: true, reference: ''),
             ],
@@ -37,7 +37,7 @@ pipeline {
             branches: [[name: 'main']],
             userRemoteConfigs: [[url: 'git@github.com:LRCZCM/LcPlugins.git', credentialsId: 'github-lrczcm-ssh']],
             extensions: [
-              pathRestriction(includedRegions: 'docs/manual/.*', excludedRegions: ''),
+              [$class: 'PathRestriction', includedRegions: 'docs/manual/.*', excludedRegions: ''],
               sparseCheckout(sparseCheckoutPaths: [[path: 'docs/manual']]),
               cloneOption(shallow: true, depth: 1, noTags: true, reference: ''),
             ],
