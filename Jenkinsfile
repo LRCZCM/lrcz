@@ -24,7 +24,7 @@ pipeline {
         dir("${env.WORKSPACE}@manual/LCML-release") {
           checkout scmGit(
             branches: [[name: 'main']],
-            userRemoteConfigs: [[url: 'https://github.com/LRCZCM/LCML-release.git']],
+            userRemoteConfigs: [[url: 'git@github.com:LRCZCM/LCML-release.git', credentialsId: 'github-lrczcm-ssh']],
             extensions: [
               pathRestriction(includedRegions: 'docs/manual/.*', excludedRegions: ''),
               sparseCheckout(sparseCheckoutPaths: [[path: 'docs/manual']]),
@@ -35,7 +35,7 @@ pipeline {
         dir("${env.WORKSPACE}@manual/LcPlugins") {
           checkout scmGit(
             branches: [[name: 'main']],
-            userRemoteConfigs: [[url: 'git@github.com:LRCZCM/LcPlugins.git', credentialsId: 'github-lcplugins-ssh']],
+            userRemoteConfigs: [[url: 'git@github.com:LRCZCM/LcPlugins.git', credentialsId: 'github-lrczcm-ssh']],
             extensions: [
               pathRestriction(includedRegions: 'docs/manual/.*', excludedRegions: ''),
               sparseCheckout(sparseCheckoutPaths: [[path: 'docs/manual']]),

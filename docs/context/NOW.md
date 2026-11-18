@@ -33,3 +33,4 @@
 
 - 2026-11-17：重测服务器网络，`github.com` 与 `api.github.com` 的 HTTPS 已可直连，只有 `raw.githubusercontent.com` 仍不通；npm 官方源与 npmmirror 可用，Docker Hub 直连不通（已配镜像）。网站自动部署方案见待定事项，待用户定。
 - 2026-11-17：网站自动部署按 Jenkins 方案实施（用户确认，部署前跑完整 `npm run check`）。`vite.config.ts` 改为经 `api.github.com` 读文件；新增 `Jenkinsfile`；服务器 Jenkins 装 Node 24（`$JENKINS_HOME/tools/node-24`），新建任务 `lrcz-website`（复用凭据 `github-lcplugins` 作 `GITHUB_TOKEN`），部署经 `docker cp` 到 OpenResty 容器，上一版留 `index.prev`。已在服务器按同样步骤试构建、试部署成功；待推送 Jenkinsfile 与配置 Webhook 后实测自动触发，测过再写入 DECISIONS“部署”。
+- 2026-11-18：服务器上 git 走 HTTPS 连 github.com 会卡住，网站任务改用 SSH 拉取。按用户要求，Jenkins 拉取全部仓库（lrcz、LCML-release、LcPlugins 及两个插件任务）统一用 LRCZCM 账号的 SSH 密钥（凭据 `github-lrczcm-ssh`，取自服务器 `/root/.ssh/id_ed25519`），删除原 LcPlugins 部署密钥凭据 `github-lcplugins-ssh`；插件任务配置改前备份为 `config.xml.bak-20261118`。插件列表每行加“下载最新版”“历史版本”按钮。
