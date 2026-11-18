@@ -1,5 +1,5 @@
 import { buttonVariants } from '@heroui/react'
-import { Mail } from 'lucide-react'
+import { Mail, Users } from 'lucide-react'
 import { motion } from 'motion/react'
 import { site } from '@/app/site'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -39,6 +39,15 @@ export function HomePage() {
           >
             <Mail className="size-4" />
             {site.email}
+          </a>
+          <a
+            href={site.qqGroupUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ size: 'lg', variant: 'tertiary' })}
+          >
+            <Users className="size-4" />
+            QQ 群 {site.qqGroup}
           </a>
         </motion.div>
       </main>

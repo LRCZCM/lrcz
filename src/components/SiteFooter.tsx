@@ -51,8 +51,8 @@ export function SiteFooter() {
       <span>
         © {year} {site.author}
       </span>
-      <a href={`mailto:${site.email}`} className={linkClass}>
-        {site.email}
+      <a href={site.qqGroupUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>
+        QQ 群 {site.qqGroup}
       </a>
       <a href={site.icpUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>
         {site.icp}
