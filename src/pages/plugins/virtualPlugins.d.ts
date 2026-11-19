@@ -15,12 +15,12 @@ declare module 'virtual:plugins' {
     cover: string
     icon: string
     /** 版本号，即构建网站时 Jenkins 最近一次成功构建的名称；页面打开后由 useLatestBuilds 换成最新的。
-     * 还没有 Jenkins 任务或成功构建时与 download 一起缺失 */
+     * 不允许下载或还没有 Jenkins 任务、成功构建时与 download 一起缺失 */
     version?: string
     /** 该版本 jar 的下载地址 */
     download?: string
-    /** Jenkins 上该插件全部构建的页面，用作历史版本 */
-    builds: string
+    /** Jenkins 上该插件全部构建的页面，用作历史版本；只有 plugin.json 的 download_plugin 为 true 时才有 */
+    builds?: string
     /** 支持的 Paper 版本，如 26.1–26.3 */
     paper: string
     /** 前置插件名 */

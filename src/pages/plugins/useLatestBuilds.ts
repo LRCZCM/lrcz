@@ -17,17 +17,19 @@ async function fetchLatest(name: string): Promise<Latest> {
   return { version: build.displayName, download: `${build.url}artifact/${jar.relativePath}` }
 }
 
-// 打开插件页后才请求，列表与手册页共用一次结果；单个插件读不到时用构建网站时记下的版本
+// 打开插件页后才请求，列表与手册页共用一次结果；单个插件读不到时用构建网站时记下的版本；不允许下载的插件不请求
 let request: Promise<Map<string, Latest>> | undefined
 
 function loadAll() {
   request ??= Promise.all(
-    plugins.map((p) =>
-      fetchLatest(p.name).then(
-        (latest) => [p.name, latest] as const,
-        () => [p.name, p] as const,
+    plugins
+      .filter((p) => p.builds)
+      .map((p) =>
+        fetchLatest(p.name).then(
+          (latest) => [p.name, latest] as const,
+          () => [p.name, p] as const,
+        ),
       ),
-    ),
   ).then((entries) => new Map(entries))
   return request
 }

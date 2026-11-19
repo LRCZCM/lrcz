@@ -90,7 +90,7 @@ function pick(text: string, pattern: RegExp, where: string) {
 /**
  * 启动开发服务器与构建时，把 LcPlugins 的 docs/manual/（各插件的手册、配图与 plugin.json）下载到 public/，
  * 并汇总成插件列表，页面从 virtual:plugins 引入（类型见 src/pages/plugins/virtualPlugins.d.ts）。
- * 版本号与下载地址取自 Jenkins，前置取自 plugin.yml 的 depend，支持的 Paper 版本为 api-version 到仓库编译用的版本。
+ * plugin.json 的 download_plugin 为 true 时才读 Jenkins 的版本号与下载地址，manual_hidden 为 true 的插件不进列表；前置取自 plugin.yml 的 depend，支持的 Paper 版本为 api-version 到仓库编译用的版本。
  */
 function lcPlugins(): Plugin {
   let list: Promise<unknown[]>
@@ -103,9 +103,17 @@ function lcPlugins(): Plugin {
       /^minecraft = "(.+)"/m,
       'libs.versions.toml',
     )
-    return Promise.all(
+    const found = await Promise.all(
       names.map(async (name) => {
         const meta = JSON.parse(await readFile(join(PLUGINS_OUT, name, 'plugin.json'), 'utf8'))
+        for (const key of ['download_plugin', 'manual_hidden'])
+          if (typeof meta[key] !== 'boolean')
+            throw new Error(`读取插件信息失败：${name} 的 plugin.json 缺少 ${key}（true 或 false）`)
+        // 隐藏的插件不进列表，手册文件也不随网站发布
+        if (meta.manual_hidden) {
+          await rm(join(PLUGINS_OUT, name), { recursive: true })
+          return []
+        }
         const yml = await (
           await raw(PLUGINS_REPO, `plugins/${name}/src/main/resources/plugin.yml`)
         ).text()
@@ -119,13 +127,16 @@ function lcPlugins(): Plugin {
           category: meta.category,
           cover: `/plugins-manual/${name}/${meta.cover}`,
           icon: `/plugins-manual/${name}/${meta.icon}`,
-          ...(await latestBuild(name)),
-          builds: `${PLUGINS_JENKINS}/${name}/`,
+          ...(meta.download_plugin && {
+            ...(await latestBuild(name)),
+            builds: `${PLUGINS_JENKINS}/${name}/`,
+          }),
           paper: oldest === latest ? oldest : `${oldest}–${latest}`,
           depends: depend.split(',').flatMap((d) => d.trim() || []),
         }
       }),
     )
+    return found.flat()
   }
 
   return {

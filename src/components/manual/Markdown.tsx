@@ -1,7 +1,7 @@
 import { Button, Modal, Skeleton, Table, Typography } from '@heroui/react'
 import { ArrowUpRight, ImageOff, RotateCw } from 'lucide-react'
 import type { MarkedToken, Token, Tokens } from 'marked'
-import { createContext, use, useMemo, useState, type ReactNode } from 'react'
+import { createContext, Fragment, use, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { asMarked, manualRoute, plainText, useManualSource, type ManualFile } from './manual'
 
@@ -273,7 +273,7 @@ function MarkdownTable({ token }: { token: Tokens.Table }) {
         <Table.Content aria-label={plainText(token.header[0].tokens)}>
           <Table.Header>
             {token.header.map((cell, i) => (
-              <Table.Column key={i} isRowHeader={i === 0}>
+              <Table.Column key={i} isRowHeader={i === 0} className="whitespace-nowrap">
                 <Inlines tokens={cell.tokens} />
               </Table.Column>
             ))}
@@ -282,7 +282,11 @@ function MarkdownTable({ token }: { token: Tokens.Table }) {
             {token.rows.map((row, i) => (
               <Table.Row key={i}>
                 {row.map((cell, j) => (
-                  <Table.Cell key={j} className={j === 0 ? 'font-semibold whitespace-nowrap' : ''}>
+                  // 中文一个字就能换行，长文字列会被挤成窄条：给它留够宽度，放不下时整表横向滚动；代码只在空格处换行
+                  <Table.Cell
+                    key={j}
+                    className={`[&_code>span]:whitespace-nowrap ${j === 0 ? 'font-semibold' : ''} ${plainText(cell.tokens).length > 20 ? 'min-w-[14em]' : ''}`}
+                  >
                     <Inlines tokens={cell.tokens} />
                   </Table.Cell>
                 ))}
@@ -332,7 +336,17 @@ function Inline({ token, trimColon }: { token: MarkedToken; trimColon: boolean }
         </del>
       )
     case 'codespan':
-      return <Typography.Code className="text-[0.88em]">{token.text}</Typography.Code>
+      return (
+        <Typography.Code className="text-[0.88em]">
+          {/* 每个词一段，表格里只在空格处换行（见 MarkdownTable） */}
+          {token.text.split(' ').map((word, i) => (
+            <Fragment key={i}>
+              {i > 0 && ' '}
+              <span>{word}</span>
+            </Fragment>
+          ))}
+        </Typography.Code>
+      )
     case 'br':
       return <br />
     case 'link':
