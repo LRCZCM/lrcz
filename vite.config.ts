@@ -90,7 +90,7 @@ function pick(text: string, pattern: RegExp, where: string) {
 /**
  * 启动开发服务器与构建时，把 LcPlugins 的 docs/manual/（各插件的手册、配图与 plugin.json）下载到 public/，
  * 并汇总成插件列表，页面从 virtual:plugins 引入（类型见 src/pages/plugins/virtualPlugins.d.ts）。
- * plugin.json 的 download_plugin 为 true 时才读 Jenkins 的版本号与下载地址，manual_hidden 为 true 的插件不进列表；前置取自 plugin.yml 的 depend，支持的 Paper 版本为 api-version 到仓库编译用的版本。
+ * plugin.json 的 download_plugin 为 true 时才读 Jenkins 的版本号与下载地址，manual_hidden 为 true 的插件不进列表；前置取自 plugin.yml 的 depend，支持的 Paper 版本为 api-version 到仓库编译用的版本，plugin.yml 写了 folia-supported: true 即支持 Folia。
  */
 function lcPlugins(): Plugin {
   let list: Promise<unknown[]>
@@ -132,6 +132,7 @@ function lcPlugins(): Plugin {
             builds: `${PLUGINS_JENKINS}/${name}/`,
           }),
           paper: oldest === latest ? oldest : `${oldest}–${latest}`,
+          folia: /^folia-supported: true$/m.test(yml),
           depends: depend.split(',').flatMap((d) => d.trim() || []),
         }
       }),

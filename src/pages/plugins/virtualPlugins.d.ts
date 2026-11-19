@@ -23,6 +23,8 @@ declare module 'virtual:plugins' {
     builds?: string
     /** 支持的 Paper 版本，如 26.1–26.3 */
     paper: string
+    /** plugin.yml 写了 folia-supported: true */
+    folia: boolean
     /** 前置插件名 */
     depends: string[]
   }

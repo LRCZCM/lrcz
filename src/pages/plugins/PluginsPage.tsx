@@ -120,6 +120,11 @@ export function PluginsPage() {
                     <Chip size="sm" variant="soft">
                       Paper {p.paper}
                     </Chip>
+                    {p.folia && (
+                      <Chip size="sm" variant="soft">
+                        支持 Folia
+                      </Chip>
+                    )}
                     {p.depends.length > 0 && (
                       <Chip size="sm" variant="soft">
                         需要 {p.depends.join('、')}

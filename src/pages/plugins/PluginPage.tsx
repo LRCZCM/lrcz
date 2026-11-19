@@ -80,6 +80,11 @@ export function PluginPage() {
           <Chip size="sm" variant="soft">
             Paper {plugin.paper}
           </Chip>
+          {plugin.folia && (
+            <Chip size="sm" variant="soft">
+              支持 Folia
+            </Chip>
+          )}
           <Chip size="sm" variant="soft">
             {plugin.depends.length ? `需要 ${plugin.depends.join('、')}` : '无需前置'}
           </Chip>
