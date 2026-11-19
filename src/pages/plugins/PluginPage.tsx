@@ -61,33 +61,39 @@ export function PluginPage() {
         </>
       }
       actions={
-        <a href={latest.download} className={buttonVariants({ size: 'sm' })}>
-          下载
-        </a>
+        latest.download && (
+          <a href={latest.download} className={buttonVariants({ size: 'sm' })}>
+            下载
+          </a>
+        )
       }
       intro={
         <div className="-mt-1 mb-2 flex flex-wrap items-center gap-1.5">
           <Chip size="sm" variant="soft" color={plugin.category === LIBRARY ? 'warning' : 'accent'}>
             {plugin.category}
           </Chip>
-          <Chip size="sm" variant="soft">
-            v{latest.version}
-          </Chip>
+          {latest.version && (
+            <Chip size="sm" variant="soft">
+              v{latest.version}
+            </Chip>
+          )}
           <Chip size="sm" variant="soft">
             Paper {plugin.paper}
           </Chip>
           <Chip size="sm" variant="soft">
             {plugin.depends.length ? `需要 ${plugin.depends.join('、')}` : '无需前置'}
           </Chip>
-          <a
-            href={plugin.builds}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-1 inline-flex items-center gap-0.5 text-sm text-muted transition-colors hover:text-foreground"
-          >
-            历史版本
-            <ArrowUpRight className="size-3.5" />
-          </a>
+          {latest.download && (
+            <a
+              href={plugin.builds}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-1 inline-flex items-center gap-0.5 text-sm text-muted transition-colors hover:text-foreground"
+            >
+              历史版本
+              <ArrowUpRight className="size-3.5" />
+            </a>
+          )}
         </div>
       }
     />

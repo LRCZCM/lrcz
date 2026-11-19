@@ -14,10 +14,11 @@ declare module 'virtual:plugins' {
     /** 封面截图与图标的本站地址 */
     cover: string
     icon: string
-    /** 版本号，即构建网站时 Jenkins 最近一次成功构建的编号；页面打开后由 useLatestBuilds 换成最新的 */
-    version: string
+    /** 版本号，即构建网站时 Jenkins 最近一次成功构建的名称；页面打开后由 useLatestBuilds 换成最新的。
+     * 还没有 Jenkins 任务或成功构建时与 download 一起缺失 */
+    version?: string
     /** 该版本 jar 的下载地址 */
-    download: string
+    download?: string
     /** Jenkins 上该插件全部构建的页面，用作历史版本 */
     builds: string
     /** 支持的 Paper 版本，如 26.1–26.3 */

@@ -61,10 +61,12 @@ const PLUGINS_MODULE = 'virtual:plugins'
 // 每个插件在 Jenkins 的 LcPlugins 文件夹下有一个同名构建任务，版本号为最近一次成功构建的名称（主版本.构建编号，如 1.37）
 const PLUGINS_JENKINS = 'https://jenkins.lrcz.com/job/LcPlugins/job'
 
-/** 插件最近一次成功构建的版本号、jar 下载地址与全部构建（历史版本）页面。 */
+/** 插件最近一次成功构建的版本号与 jar 下载地址。 */
 async function latestBuild(name: string) {
   const api = `${PLUGINS_JENKINS}/${name}/lastSuccessfulBuild/api/json?tree=displayName,url,artifacts[relativePath]`
   const response = await fetch(api)
+  // 404：还没建 Jenkins 任务或还没有成功构建，插件照常显示，只是没有版本与下载
+  if (response.status === 404) return {}
   if (!response.ok) throw new Error(`读取插件构建失败：${api} 返回 ${response.status}`)
   const build = (await response.json()) as {
     displayName: string
@@ -76,7 +78,6 @@ async function latestBuild(name: string) {
   return {
     version: build.displayName,
     download: `${build.url}artifact/${jar.relativePath}`,
-    builds: `${PLUGINS_JENKINS}/${name}/`,
   }
 }
 
@@ -119,6 +120,7 @@ function lcPlugins(): Plugin {
           cover: `/plugins-manual/${name}/${meta.cover}`,
           icon: `/plugins-manual/${name}/${meta.icon}`,
           ...(await latestBuild(name)),
+          builds: `${PLUGINS_JENKINS}/${name}/`,
           paper: oldest === latest ? oldest : `${oldest}–${latest}`,
           depends: depend.split(',').flatMap((d) => d.trim() || []),
         }

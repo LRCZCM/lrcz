@@ -35,3 +35,4 @@
 - 2026-11-18：服务器上 git 走 HTTPS 连 github.com 会卡住，网站任务改用 SSH 拉取。按用户要求，Jenkins 拉取全部仓库（lrcz、LCML-release、LcPlugins 及两个插件任务）统一用 LRCZCM 账号的 SSH 密钥（凭据 `github-lrczcm-ssh`，取自服务器 `/root/.ssh/id_ed25519`），删除原 LcPlugins 部署密钥凭据 `github-lcplugins-ssh`；插件任务配置改前备份为 `config.xml.bak-20261118`。插件列表每行加“下载最新版”“历史版本”按钮。
 - 2026-11-18：用户实测通过：自动部署（lrcz 与手册仓库推送均自动构建部署）、插件列表的下载与历史版本按钮。部署流程、涉及仓库与换服务器步骤写入 [DEPLOY](DEPLOY.md)，DECISIONS“部署”“插件分发”同步更新。
 - 2026-11-18：插件版本号改为“主版本.构建编号”（如 `1.37`，用户定，规则见 LcPlugins 的 DECISIONS“版本号与自动构建”）。官网构建时与打开页面时改读 Jenkins 构建名称 `displayName`；服务器伪静态的 `/api/plugins/` 转发同步加上 `displayName`（备份 `www.lrcz.com.conf.bak-20261118b`）；过渡期曾同时返回 `number`，新站上线后已去掉。插件任务首次按新格式构建需手动触发（Jenkins 判断改动用上次构建记下的拉取配置，旧配置的密钥已删），已触发：LcInputLib `1.5`、LcToolBelt `1.3`。
+- 2026-11-19：没有 Jenkins 任务或成功构建的插件不再让网站构建失败：构建时 Jenkins 返回 404 即视为暂无版本，列表与手册照常显示，隐藏版本标签、下载与历史版本；打开页面时动态读取失败也同样隐藏（本站 `/api/plugins/` 对不存在的任务返回首页 HTML，解析失败后按无版本处理）。验证：`npm run check` 通过；未在浏览器中验证无版本插件的显示。

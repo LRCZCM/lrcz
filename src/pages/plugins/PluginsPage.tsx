@@ -112,9 +112,11 @@ export function PluginsPage() {
                     >
                       {p.category}
                     </Chip>
-                    <Chip size="sm" variant="soft">
-                      v{latest.version}
-                    </Chip>
+                    {latest.version && (
+                      <Chip size="sm" variant="soft">
+                        v{latest.version}
+                      </Chip>
+                    )}
                     <Chip size="sm" variant="soft">
                       Paper {p.paper}
                     </Chip>
@@ -125,24 +127,26 @@ export function PluginsPage() {
                     )}
                   </div>
                 </div>
-                <div className="relative grid gap-2 max-sm:col-start-2 max-sm:flex">
-                  <a
-                    href={latest.download}
-                    className={`${buttonVariants({ size: 'sm' })} sm:w-full`}
-                  >
-                    <Download className="size-4" />
-                    下载最新版
-                  </a>
-                  <a
-                    href={p.builds}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${buttonVariants({ size: 'sm', variant: 'tertiary' })} sm:w-full`}
-                  >
-                    历史版本
-                    <ArrowUpRight className="size-4" />
-                  </a>
-                </div>
+                {latest.download && (
+                  <div className="relative grid gap-2 max-sm:col-start-2 max-sm:flex">
+                    <a
+                      href={latest.download}
+                      className={`${buttonVariants({ size: 'sm' })} sm:w-full`}
+                    >
+                      <Download className="size-4" />
+                      下载最新版
+                    </a>
+                    <a
+                      href={p.builds}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${buttonVariants({ size: 'sm', variant: 'tertiary' })} sm:w-full`}
+                    >
+                      历史版本
+                      <ArrowUpRight className="size-4" />
+                    </a>
+                  </div>
+                )}
               </div>
             )
           })}
